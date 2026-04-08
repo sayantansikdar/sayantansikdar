@@ -184,12 +184,7 @@ document.getElementById('contactForm').addEventListener('submit', e => {
   setTimeout(() => { btn.querySelector('.btn-text').textContent = 'Send Hell Butterfly'; e.target.reset(); }, 3000);
 });
 
-// ===== Resume Button =====
-document.getElementById('resumeBtn').addEventListener('click', e => {
-  e.preventDefault();
-  showSFX('斬月', e.clientX, e.clientY);
-  alert('Resume scroll will be available from Soul Society archives soon!');
-});
+
 
 // ===== Active Nav Link =====
 const sections = document.querySelectorAll('section[id]');
