@@ -220,7 +220,14 @@ strong { color: var(--white); font-weight: 700; }
 }
 .reiatsu-particles { position: absolute; inset: 0; }
 .hero-container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
-.hero-content { max-width: 760px; }
+.hero-content { 
+  max-width: 760px; 
+  margin: 0 auto; 
+  display: flex; 
+  flex-direction: column; 
+  align-items: center; 
+  text-align: center; 
+}
 
 .hero-badge {
   display: inline-flex; align-items: center; gap: 10px;
@@ -293,17 +300,17 @@ strong { color: var(--white); font-weight: 700; }
 @keyframes cursorBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
 
 .hero-location {
-  display: flex; align-items: center; gap: 6px;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
   color: var(--gray); font-size: 0.9rem; margin-bottom: 32px;
   letter-spacing: 0.05em;
   animation: fadeInUp 0.8s ease-out 0.5s both;
 }
 .hero-actions {
-  display: flex; gap: 16px; margin-bottom: 40px; flex-wrap: wrap;
+  display: flex; justify-content: center; gap: 16px; margin-bottom: 40px; flex-wrap: wrap;
   animation: fadeInUp 0.8s ease-out 0.6s both;
 }
 .hero-socials {
-  display: flex; gap: 16px;
+  display: flex; justify-content: center; gap: 16px;
   animation: fadeInUp 0.8s ease-out 0.7s both;
 }
 .social-icon {
