@@ -264,7 +264,7 @@
   
 | Degree | Institution | CGPA |
 |--------|-------------|------|
-| M.Tech (IT) | Netaji Subhas University of Technology | 6.80 |
+| M.Tech (IT) | Netaji Subhas University of Technology | 7.11 |
 | B.Tech (CSE - AI&ML) | Haldia Institute of Technology | 8.65 |
 
 </div>
