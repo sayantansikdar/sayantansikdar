@@ -427,8 +427,11 @@
       const labelled = t.closest('[data-cursor]');
       const lensEl = t.closest('[data-cursor-lens]');
       const link = t.closest('a, button, label, [data-magnetic]');
-      cursor.classList.toggle('is-label', !!labelled);
-      cursor.classList.toggle('is-link', !labelled && !lensEl && !!link);
+      // over liquid glass the pointer hands off to the glass itself
+      const onGlass = !!t.closest('.nav__mark, .nav__meta, .nav__links, .nav__toggle, .glass');
+      cursor.classList.toggle('is-glass', onGlass);
+      cursor.classList.toggle('is-label', !onGlass && !!labelled);
+      cursor.classList.toggle('is-link', !onGlass && !labelled && !lensEl && !!link);
       if (labelled) cursorLabel.textContent = labelled.dataset.cursor;
     });
 
@@ -494,6 +497,159 @@
         m.on = false;
         m.el.style.translate = '';
       }
+    }
+  }
+
+
+  /* ---------------------------------------------------------------------
+     Liquid glass — springs, not easings. Each pill swells on hover, leans
+     toward the pointer, squishes on press; a lens slides between nav links.
+     Springs use Apple's damping / response parameters and always animate
+     from their current value, so every motion can be interrupted.
+     --------------------------------------------------------------------- */
+  function spring(value, response = 0.35, damping = 1) {
+    return { x: value, v: 0, t: value, k: Math.pow((2 * Math.PI) / response, 2), c: (4 * Math.PI * damping) / response };
+  }
+  function stepSpring(sp, dt) {
+    if (!motion) { sp.x = sp.t; sp.v = 0; return; }
+    const n = Math.max(1, Math.ceil(dt / 0.008));
+    const h = dt / n;
+    for (let i = 0; i < n; i++) {
+      sp.v += (-sp.k * (sp.x - sp.t) - sp.c * sp.v) * h;
+      sp.x += sp.v * h;
+    }
+    if (Math.abs(sp.x - sp.t) < 0.0005 && Math.abs(sp.v) < 0.0005) { sp.x = sp.t; sp.v = 0; }
+  }
+
+  const pills = $$('.nav__mark, .nav__meta, .nav__links, .nav__toggle, .glass').map(el => ({
+    el,
+    s: spring(1, 0.32, 0.62),   // scale: a little jelly, like a drop of glass
+    x: spring(0, 0.4, 0.8),
+    y: spring(0, 0.4, 0.8),
+    hover: false,
+    press: false,
+    big: el.classList.contains('nav__links'),
+  }));
+
+  pills.forEach(pl => {
+    const { el } = pl;
+    const aim = () => { pl.s.t = pl.press ? (pl.big ? 0.985 : 0.95) : pl.hover ? (pl.big ? 1.015 : 1.045) : 1; };
+    el.addEventListener('pointerenter', e => {
+      if (e.pointerType !== 'mouse') return;
+      pl.hover = true;
+      el.style.setProperty('--glow', '0.26');
+      aim();
+    });
+    el.addEventListener('pointermove', e => {
+      const r = el.getBoundingClientRect();
+      const px = (e.clientX - r.left) / r.width;
+      const py = (e.clientY - r.top) / r.height;
+      el.style.setProperty('--gx', (px * 100).toFixed(1) + '%');
+      el.style.setProperty('--gy', (py * 100 - 40).toFixed(1) + '%');
+      // lean toward the pointer, more along the long axis
+      pl.x.t = (px - 0.5) * (pl.big ? 4 : 7);
+      pl.y.t = (py - 0.5) * 3;
+    });
+    el.addEventListener('pointerleave', () => {
+      pl.hover = false;
+      pl.press = false;
+      pl.x.t = 0;
+      pl.y.t = 0;
+      el.style.setProperty('--glow', '0.12');
+      aim();
+    });
+    // feedback on press, not on click
+    el.addEventListener('pointerdown', () => { pl.press = true; aim(); });
+    addEventListener('pointerup', () => { if (pl.press) { pl.press = false; aim(); } });
+  });
+
+  // The lens
+  const linksPill = $('.nav__links');
+  const lensEl = $('.nav__lens');
+  const lens2 = { x: spring(0, 0.34, 1), w: spring(0, 0.34, 1), o: spring(0, 0.25, 1), s: spring(0.85, 0.3, 0.7), hover: null, inside: false };
+  const lensLinks = linksPill ? $$('a', linksPill) : [];
+
+  function lensTargetFor(a, pointerX) {
+    const pr = linksPill.getBoundingClientRect();
+    const r = a.getBoundingClientRect();
+    const pad = 14;
+    let x = r.left - pr.left - pad;
+    // follow the pointer slightly inside the link, like dragging a droplet
+    if (pointerX != null) x += (pointerX - (r.left + r.width / 2)) * 0.12;
+    return { x, w: r.width / (parseFloat(a.style.scale) || 1) + pad * 2 };
+  }
+
+  function placeLens(a, pointerX, jump) {
+    const t = lensTargetFor(a, pointerX);
+    lens2.x.t = t.x;
+    lens2.w.t = t.w;
+    if (jump) { lens2.x.x = t.x; lens2.w.x = t.w; lens2.x.v = lens2.w.v = 0; }
+  }
+
+  if (linksPill && finePointer) {
+    linksPill.addEventListener('pointermove', e => {
+      const a = e.target.closest('a');
+      if (!a) return;
+      const appearing = lens2.o.x < 0.05;
+      lens2.inside = true;
+      lens2.hover = a;
+      lens2.o.t = 1;
+      lens2.s.t = 1;
+      placeLens(a, e.clientX, appearing);
+    });
+    linksPill.addEventListener('pointerleave', () => {
+      lens2.inside = false;
+      lens2.hover = null;
+    });
+    linksPill.addEventListener('pointerdown', () => { lens2.s.t = 0.9; });
+    linksPill.addEventListener('pointerup', () => { lens2.s.t = 1; });
+  }
+
+  function updateGlass(dt) {
+    for (const pl of pills) {
+      stepSpring(pl.s, dt);
+      stepSpring(pl.x, dt);
+      stepSpring(pl.y, dt);
+      // squash & stretch: volume-preserving, so it reads as liquid
+      const sx = pl.s.x + Math.abs(pl.x.v) * 0.0009;
+      const sy = pl.s.x - Math.abs(pl.x.v) * 0.0006;
+      pl.el.style.scale = `${sx.toFixed(4)} ${sy.toFixed(4)}`;
+      pl.el.style.translate = `${pl.x.x.toFixed(2)}px ${pl.y.x.toFixed(2)}px`;
+    }
+
+    if (!lensEl || !finePointer) return;
+    if (!lens2.inside) {
+      // rest on the section in view, or dissolve
+      const active = lensLinks.find(a => a.classList.contains('is-active'));
+      if (active) {
+        const appearing = lens2.o.x < 0.05;
+        placeLens(active, null, appearing);
+        lens2.o.t = 0.75;
+        lens2.s.t = 1;
+      } else {
+        lens2.o.t = 0;
+        lens2.s.t = 0.85;
+      }
+    }
+    stepSpring(lens2.x, dt);
+    stepSpring(lens2.w, dt);
+    stepSpring(lens2.o, dt);
+    stepSpring(lens2.s, dt);
+    // stretch with speed (motion encodes velocity), thin slightly as it travels
+    const speed = Math.abs(lens2.x.v);
+    const stretch = Math.min(speed / 2600, 0.22);
+    lensEl.style.width = Math.max(0, lens2.w.x).toFixed(1) + 'px';
+    lensEl.style.opacity = clamp(lens2.o.x).toFixed(3);
+    lensEl.style.transform = `translate3d(${lens2.x.x.toFixed(2)}px, -50%, 0) scale(${(lens2.s.x * (1 + stretch * 0.35)).toFixed(4)}, ${(lens2.s.x * (1 - stretch * 0.45)).toFixed(4)})`;
+
+    // magnify the text under the lens, continuously with its position
+    const pr = linksPill.getBoundingClientRect();
+    const lc = pr.left + lens2.x.x + lens2.w.x / 2;
+    for (const a of lensLinks) {
+      const r = a.getBoundingClientRect();
+      const d = Math.abs(r.left + r.width / 2 - lc) / (r.width * 0.9 + 1);
+      const mag = 1 + 0.07 * clamp(1 - d) * clamp(lens2.o.x);
+      a.style.scale = mag.toFixed(4);
     }
   }
 
@@ -641,6 +797,7 @@
       updateMarquee(dt);
     }
     updatePointerUI();
+    updateGlass((dt * 16.667) / 1000);
     updateNav();
     scrollBar.style.setProperty('--doc', (sy / docMax).toFixed(4));
     if (badge && motion) badge.style.setProperty('--rot', ((sy * 0.06 + now * 0.004) % 360).toFixed(2) + 'deg');

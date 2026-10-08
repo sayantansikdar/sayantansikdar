@@ -372,7 +372,7 @@ button:focus-visible .roll .c { transform: translateY(-1.3em); }
   display: grid;
   place-items: center;
   transition: width 0.45s var(--ease-out), height 0.45s var(--ease-out), margin 0.45s var(--ease-out),
-    background-color 0.3s, border-color 0.3s;
+    background-color 0.3s, border-color 0.3s, opacity 0.3s;
 }
 .cursor.is-link .cursor__ring {
   width: 64px; height: 64px;
@@ -407,6 +407,12 @@ button:focus-visible .roll .c { transform: translateY(-1.3em); }
 }
 .cursor.is-label .cursor__label { opacity: 1; transform: none; }
 .cursor.is-hidden { opacity: 0; }
+.cursor.is-glass .cursor__ring {
+  width: 10px; height: 10px;
+  margin: -5px 0 0 -5px;
+  opacity: 0;
+}
+.cursor.is-glass .cursor__dot { opacity: 0.55; }
 
 /* Metric card that follows the cursor across the work list */
 .metric-float {
@@ -479,7 +485,7 @@ button:focus-visible .roll .c { transform: translateY(-1.3em); }
   border-radius: inherit;
   pointer-events: none;
   background:
-    radial-gradient(120% 90% at 20% -20%, rgba(255, 255, 255, 0.12), transparent 55%),
+    radial-gradient(90% 140% at var(--gx, 20%) var(--gy, -20%), rgba(255, 255, 255, var(--glow, 0.12)), transparent 60%),
     linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent 45%, rgba(255, 255, 255, 0.02));
 }
 [data-nav='light'] .nav__mark,
@@ -547,7 +553,62 @@ button:focus-visible .roll .c { transform: translateY(-1.3em); }
   font-size: 0.92rem;
   font-weight: 500;
 }
-.nav__links a { position: relative; }
+.nav__links a {
+  position: relative;
+  z-index: 1;
+  display: inline-block;
+  scale: var(--mag, 1);
+  transform-origin: 50% 60%;
+}
+.nav__links a.is-active::before { opacity: 0; }
+
+/* The lens: a thicker drop of glass that slides between links */
+.nav__lens {
+  position: absolute;
+  z-index: 0;
+  left: 0;
+  top: 50%;
+  height: calc(100% - 8px);
+  width: 0;
+  border-radius: 999px;
+  pointer-events: none;
+  opacity: 0;
+  background: rgba(255, 255, 255, 0.07);
+  -webkit-backdrop-filter: blur(6px) saturate(190%) brightness(1.12);
+  backdrop-filter: blur(6px) saturate(190%) brightness(1.12);
+  box-shadow:
+    inset 0 1px 0.5px rgba(255, 255, 255, 0.45),
+    inset 0 -1px 1px rgba(255, 255, 255, 0.1),
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.14),
+    0 4px 14px rgba(0, 0, 0, 0.18);
+  will-change: transform, width, opacity;
+}
+[data-nav='light'] .nav__lens {
+  background: rgba(255, 255, 255, 0.4);
+  box-shadow:
+    inset 0 1px 0.5px rgba(255, 255, 255, 0.95),
+    inset 0 -1px 1px rgba(14, 15, 17, 0.06),
+    inset 0 0 0 0.5px rgba(14, 15, 17, 0.08),
+    0 4px 14px rgba(14, 15, 17, 0.1);
+}
+
+/* Glass pills are moved by springs in script.js (translate / scale) */
+.nav__mark,
+.nav__meta,
+.nav__links,
+.nav__toggle,
+.glass { will-change: translate, scale; }
+
+@media (prefers-reduced-transparency: reduce) {
+  .nav__mark, .nav__meta, .nav__links, .nav__toggle, .glass {
+    --glass-fill: rgba(22, 24, 27, 0.92);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  [data-nav='light'] .nav__mark, [data-nav='light'] .nav__meta,
+  [data-nav='light'] .nav__links, [data-nav='light'] .nav__toggle { --glass-fill: rgba(236, 235, 230, 0.94); }
+  .nav__lens { background: rgba(255, 255, 255, 0.14); backdrop-filter: none; -webkit-backdrop-filter: none; }
+}
 .nav__links a.is-active::before {
   content: '';
   position: absolute;
