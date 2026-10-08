@@ -443,6 +443,64 @@ button:focus-visible .roll .c { transform: translateY(-1.3em); }
 }
 
 /* =========================================================================
+   Liquid glass — near-transparent pills: blur + saturation lens, a bright
+   specular rim on top, a faint refraction edge below. Almost no fill.
+   ========================================================================= */
+.glass,
+.nav__mark,
+.nav__meta,
+.nav__links,
+.nav__toggle {
+  --glass-fill: rgba(255, 255, 255, 0.018);
+  --glass-rim: rgba(255, 255, 255, 0.16);
+  --glass-edge: rgba(255, 255, 255, 0.06);
+  position: relative;
+  isolation: isolate;
+  border-radius: 999px;
+  background: var(--glass-fill);
+  -webkit-backdrop-filter: blur(12px) saturate(170%) brightness(1.04);
+  backdrop-filter: blur(12px) saturate(170%) brightness(1.04);
+  box-shadow:
+    inset 0 1px 0.5px var(--glass-rim),
+    inset 0 -1px 0.5px var(--glass-edge),
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.07),
+    0 6px 22px rgba(0, 0, 0, 0.1);
+}
+/* Specular sheen: light catching the curved top of the glass */
+.glass::before,
+.nav__mark::before,
+.nav__meta::before,
+.nav__links::before,
+.nav__toggle::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    radial-gradient(120% 90% at 20% -20%, rgba(255, 255, 255, 0.12), transparent 55%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent 45%, rgba(255, 255, 255, 0.02));
+}
+[data-nav='light'] .nav__mark,
+[data-nav='light'] .nav__meta,
+[data-nav='light'] .nav__links,
+[data-nav='light'] .nav__toggle {
+  --glass-fill: rgba(255, 255, 255, 0.06);
+  --glass-rim: rgba(255, 255, 255, 0.7);
+  --glass-edge: rgba(14, 15, 17, 0.06);
+  box-shadow:
+    inset 0 1px 0.5px var(--glass-rim),
+    inset 0 -1px 0.5px var(--glass-edge),
+    inset 0 0 0 0.5px rgba(14, 15, 17, 0.07),
+    0 6px 22px rgba(14, 15, 17, 0.06);
+}
+.menu-open .nav__toggle {
+  --glass-fill: rgba(255, 255, 255, 0.018);
+  --glass-rim: rgba(255, 255, 255, 0.16);
+}
+
+/* =========================================================================
    Navigation
    ========================================================================= */
 .nav {
@@ -462,7 +520,8 @@ button:focus-visible .roll .c { transform: translateY(-1.3em); }
 
 .nav__mark {
   justify-self: start;
-  font-size: 1.15rem;
+  padding: 0.5rem 1rem;
+  font-size: 1.05rem;
   font-weight: 600;
   letter-spacing: -0.03em;
 }
@@ -476,14 +535,16 @@ button:focus-visible .roll .c { transform: translateY(-1.3em); }
 .nav__meta {
   display: flex;
   gap: 0.6em;
-  opacity: 0.7;
+  padding: 0.62rem 1.05rem;
 }
+.nav__meta span { opacity: 0.7; }
 .nav__meta time { font-variant-numeric: tabular-nums; }
 .nav__links {
   justify-self: end;
   display: flex;
-  gap: clamp(1rem, 2vw, 2.2rem);
-  font-size: 0.95rem;
+  gap: clamp(1rem, 2vw, 2rem);
+  padding: 0.55rem 1.4rem;
+  font-size: 0.92rem;
   font-weight: 500;
 }
 .nav__links a { position: relative; }
@@ -496,7 +557,7 @@ button:focus-visible .roll .c { transform: translateY(-1.3em); }
   border-radius: 50%;
   background: var(--red);
 }
-.nav__toggle { display: none; justify-self: end; }
+.nav__toggle { display: none; justify-self: end; padding: 0.6rem 1.1rem; }
 .nav__toggle-close { display: none; }
 .menu-open .nav__toggle-open { display: none; }
 .menu-open .nav__toggle-close { display: inline; }
@@ -563,7 +624,7 @@ button:focus-visible .roll .c { transform: translateY(-1.3em); }
   gap: 1rem;
   color: var(--muted);
 }
-.hero__status { display: inline-flex; align-items: center; gap: 0.6em; color: var(--bone); }
+.hero__status { display: inline-flex; align-items: center; gap: 0.6em; padding: 0.5rem 0.95rem; color: var(--bone); }
 .pulse {
   position: relative;
   width: 7px; height: 7px;
@@ -1298,8 +1359,8 @@ button:focus-visible .roll .c { transform: translateY(-1.3em); }
 }
 .paper__title {
   margin-top: clamp(2.5rem, 7vw, 6rem);
-  max-width: 14ch;
-  font-size: clamp(2.6rem, 7vw, 7rem);
+  max-width: 17ch;
+  font-size: clamp(2.2rem, 5.2vw, 5.4rem);
   font-weight: 500;
   line-height: 0.92;
   letter-spacing: -0.055em;
@@ -1532,7 +1593,7 @@ button:focus-visible .roll .c { transform: translateY(-1.3em); }
   .nav__links { display: none; }
   .nav__toggle { display: block; }
 
-  .hero__meta { flex-direction: column; gap: 0.4rem; }
+  .hero__meta { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
   .hero__name { font-size: min(22vw, 30svh); }
   .hero__foot { flex-direction: column; align-items: flex-start; gap: 1.25rem; }
   .dossier__tag { white-space: normal; max-width: 90%; }

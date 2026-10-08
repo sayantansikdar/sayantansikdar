@@ -1,0 +1,291 @@
+%-------------------------
+% Resume in Latex
+% Author : Sayantan Sikdar
+% Based off of: https://github.com/sayantansikdar/resume
+% License : MIT
+%------------------------
+
+\documentclass[letterpaper,11pt]{article}
+
+\usepackage{latexsym}
+\usepackage[empty]{fullpage}
+\usepackage{titlesec}
+\usepackage{marvosym}
+\usepackage[usenames,dvipsnames]{color}
+\usepackage{verbatim}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+\usepackage{fancyhdr}
+\usepackage[english]{babel}
+\usepackage{tabularx}
+\usepackage{fontawesome5}
+\usepackage{multicol}
+\usepackage{ulem}
+\setlength{\multicolsep}{-3.0pt}
+\setlength{\columnsep}{-1pt}
+% pdfLaTeX (Overleaf) gets copy-pasteable glyphs; XeLaTeX/Tectonic skip this
+\ifdefined\pdfgentounicode
+  \input{glyphtounicode}
+  \pdfgentounicode=1
+\fi
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyfoot{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+
+% Adjust margins
+\addtolength{\oddsidemargin}{-0.6in}
+\addtolength{\evensidemargin}{-0.5in}
+\addtolength{\textwidth}{1.19in}
+\addtolength{\topmargin}{-.7in}
+\addtolength{\textheight}{1.4in}
+
+\urlstyle{same}
+
+\raggedbottom
+\raggedright
+\setlength{\tabcolsep}{0in}
+
+% Sections formatting
+\titleformat{\section}{
+  \vspace{-4pt}\scshape\raggedright\large\bfseries
+}{}{0em}{}[\color{black}\titlerule \vspace{-5pt}]
+
+%-------------------------
+% Custom commands
+\newcommand{\resumeItem}[1]{
+  \item\small{
+    {#1 \vspace{-2pt}}
+  }
+}
+
+% Experience: employer, role, repo, live link, dates
+\newcommand{\resumeExperienceWithBoth}[5]{
+  \vspace{-2pt}\item
+    \begin{tabular*}{1.0\textwidth}[t]{l@{\extracolsep{\fill}}r}
+      \textbf{#1} \textit{\small#2} \textit{\uline{\href{#3}{Repo}}} \textit{\uline{\href{#4}{Link}}} & \textbf{\small #5} \\
+    \end{tabular*}\vspace{-7pt}
+}
+
+% Experience: employer, role, repo, dates
+\newcommand{\resumeExperienceWithRepo}[4]{
+  \vspace{-2pt}\item
+    \begin{tabular*}{1.0\textwidth}[t]{l@{\extracolsep{\fill}}r}
+      \textbf{#1} \textit{\small#2} \textit{\uline{\href{#3}{Repo}}} & \textbf{\small #4} \\
+    \end{tabular*}\vspace{-7pt}
+}
+
+% Project: title, repo, right-hand label
+\newcommand{\resumeProjectHeadingWithRepo}[3]{
+    \item
+    \begin{tabular*}{1.0\textwidth}{p{0.78\textwidth} r}
+      \small#1 \textit{\uline{\href{#2}{Repo}}} & \textbf{\small #3}\\
+    \end{tabular*}\vspace{-4pt}
+}
+
+% Project: title, repo, live link, right-hand label
+\newcommand{\resumeProjectHeadingWithBoth}[4]{
+    \item
+    \begin{tabular*}{1.0\textwidth}{p{0.78\textwidth} r}
+      \small#1 \textit{\uline{\href{#2}{Repo}}} \textit{\uline{\href{#3}{Link}}} & \textbf{\small #4}\\
+    \end{tabular*}\vspace{-4pt}
+}
+
+\renewcommand\labelitemi{$\vcenter{\hbox{\tiny$\bullet$}}$}
+\renewcommand\labelitemii{$\vcenter{\hbox{\tiny$\bullet$}}$}
+
+\newcommand{\resumeSubHeadingListStart}{\begin{itemize}[leftmargin=0.0in, label={}]}
+\newcommand{\resumeSubHeadingListEnd}{\end{itemize}}
+\newcommand{\resumeItemListStart}{\begin{itemize}[leftmargin=0.2in, itemsep=0pt]}
+\newcommand{\resumeItemListEnd}{\end{itemize}\vspace{-5pt}}
+
+%-------------------------------------------
+%%%%%%  RESUME STARTS HERE  %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\begin{document}
+
+%----------HEADING----------
+\begin{center}
+    {\Huge \scshape Sayantan Sikdar} \\
+    \vspace{2pt}
+    \href{https://sayantansikdar.software}{\uline{sayantansikdar.software}} ~ | ~
+    \small New Delhi, IN
+
+    \vspace{4pt}
+    \small +91 8902091002 ~ | ~ \href{mailto:sayantansikdar@outlook.com}{\uline{sayantansikdar@outlook.com}} ~ | ~
+    \href{https://linkedin.com/in/sayantansikdar}{\uline{linkedin.com/in/sayantansikdar}} ~ | ~
+    \href{https://github.com/sayantansikdar}{\uline{github.com/sayantansikdar}}
+    \vspace{-8pt}
+\end{center}
+
+%-----------SUMMARY-----------
+\section{Summary}
+\begin{itemize}[leftmargin=0.15in, label={}]
+    \small{\item{
+     M.Tech (IT) candidate and IEEE-published AI/ML engineer who ships end-to-end systems --- LLM fine-tuning, durable AI
+     agents, a Fabric lakehouse reconciled to the cent and a dialer verified by 529 tests --- and owns the full loop from
+     scoping with stakeholders to deploying and explaining the numbers.
+    }}
+\end{itemize}
+\vspace{-12pt}
+
+%-----------EDUCATION-----------
+\section{Education}
+\begin{itemize}[leftmargin=0.15in, label={}]
+    \small{\item{
+     \textbf{Masters of Technology, \textit{IT}}, \textit{Netaji Subhas University of Technology, CGPA: 7.11} \hfill \textbf{2025 -- 2027} \\
+     \textbf{Bachelors of Technology, \textit{CSE (AI / ML)}}, \textit{Haldia Institute of Technology, CGPA: 8.65} \hfill \textbf{2020 -- 2024}\\
+    }}
+\end{itemize}
+\vspace{-12pt}
+
+%-----------TECHNICAL SKILLS-----------
+\section{Technical Skills}
+\begin{itemize}[leftmargin=0.15in, label={}, itemsep=0pt]
+    \small{\item{
+     \textbf{Programming Languages:}{ Python, TypeScript, SQL, Java} \\
+     \textbf{LLMs \& GenAI:}{ LoRA/QLoRA Fine-Tuning, HuggingFace Transformers, Hybrid RAG (BM25 + Dense, RRF), Embeddings, LanceDB, Agentic Workflows, Pydantic AI, Claude API, Ollama, Prompt Engineering} \\
+     \textbf{Machine Learning:}{ PyTorch, TensorFlow/Keras, scikit-learn, XGBoost, Time-Series Forecasting, Bayesian Optimization (TuRBO, SAASBO), CMA-ES, Computer Vision (YOLO, OpenCV), Collaborative Filtering, A/B Testing} \\
+     \textbf{Data Engineering \& Analytics:}{ Microsoft Fabric, Medallion Architecture, Delta Lake, PySpark, Spark SQL, SCD Type 2, Data Quality \& Reconciliation, Airflow, DVC, PostgreSQL, SQLite, DynamoDB} \\
+     \textbf{Backend \& Orchestration:}{ FastAPI, Fastify, Temporal (durable workflows), REST/SSE APIs, Next.js 15, React, Drizzle ORM, Stripe, Clerk} \\
+     \textbf{Testing \& QA:}{ Vitest, Cypress, Cucumber (BDD), Page Object Model, Allure, Unit / Integration / E2E, CI Gating} \\
+     \textbf{Cloud \& DevOps:}{ AWS (SageMaker, Lambda, API Gateway, S3, DynamoDB, CloudFront, SAM), Azure (Fabric, Entra ID), GCP, Docker, GitHub Actions, MLflow, Prometheus, Grafana, Datadog RUM, Vercel, Linux, Git} \\
+    }}
+\end{itemize}
+\vspace{-12pt}
+
+%-----------EXPERIENCE-----------
+\section{Work Experience}
+\resumeSubHeadingListStart
+
+\resumeExperienceWithBoth
+    {Self Employed}{ | \textit{Freelance Full Stack Developer}}
+    {https://github.com/sayantansikdar/morsaabs}{https://morsaabs.vercel.app}{Feb 2025 -- May 2025}
+    \resumeItemListStart
+        \resumeItem{\textbf{Situation:} Morsaab's, a vegetarian restaurant in New Delhi, needed online ordering, bookings and an editable menu.}
+        \resumeItem{\textbf{Action:} Built a Next.js 15 + TypeScript platform: a 9-category menu on Neon Postgres + Drizzle, Stripe Checkout with signed webhooks, a Clerk-gated admin CRM, Vercel Blob and Datadog RUM; mapped an AWS SAM serverless path (Lambda, DynamoDB, CloudFront).}
+        \resumeItem{\textbf{Result:} Shipped 9.8k lines in under 40 hours, about 4x faster than a typical 3--4 week build; live on Vercel.}
+    \resumeItemListEnd
+
+\resumeExperienceWithRepo
+    {WBSEDCL}{ | \textit{Architect-Machine Learning Trainee}}
+    {https://github.com/sayantansikdar/yolov9n-meter-reading}{Mar 2024 -- Apr 2024}
+    \resumeItemListStart
+        \resumeItem{\textbf{Situation:} The state utility read electricity meters by hand, which was slow and error-prone at scale.}
+        \resumeItem{\textbf{Action:} Built an automatic meter-reading pipeline that crops the meter display, then benchmarked YOLO v5, v7 and v9-e for digit recognition; cleaned 466 images with erosion and HSV correction.}
+        \resumeItem{\textbf{Result:} Reached 99\% accuracy, 94\% precision and 93\% mAP, cut reading errors by 95\% and saves a projected 500+ staff-hours a year.}
+        \resumeItem{\textbf{Tech Stack:} Python, YOLO v5 / v7 / v9-e, Roboflow, OpenCV}
+    \resumeItemListEnd
+
+\resumeExperienceWithRepo
+    {NIELIT Kolkata}{ | \textit{Artificial Intelligence Intern}}
+    {https://github.com/sayantansikdar/fruit-grading-and-classification}{Sep 2023 -- Mar 2024}
+    \resumeItemListStart
+        \resumeItem{\textbf{Situation:} Manual fruit grading is slow and inconsistent, as fruit of one variety looks nearly identical.}
+        \resumeItem{\textbf{Action:} Designed a real-time, non-destructive grading framework comparing AlexNet and ResNet v2 across two datasets, with segmentation-focused preprocessing feeding a conveyor-belt sorting prototype.}
+        \resumeItem{\textbf{Result:} 99\% accuracy on 2.2K images and 98.33\% (0.9752 F1) on 15.5K images; published at IEEE.}
+        \resumeItem{\textbf{Tech Stack:} Python, Keras, NumPy, OpenCV, AlexNet, ResNet v2}
+    \resumeItemListEnd
+
+\resumeSubHeadingListEnd
+\vspace{-12pt}
+
+%-----------PROJECTS-----------
+\section{Projects}
+\resumeSubHeadingListStart
+
+\resumeProjectHeadingWithRepo
+    {\textbf{NovaCart --- Microsoft Fabric Medallion Pipeline} \textit{\small (team of 5)}}
+    {https://github.com/sayantansikdar/novacart-medallion-pipeline}{Data Engineering}
+\resumeItemListStart
+    \resumeItem{\textbf{Situation:} Finance at a 5-country retailer got conflicting revenue figures; late corrections could overwrite newer orders.}
+    \resumeItem{\textbf{Action:} Built a bronze--silver--gold Fabric lakehouse: newer-wins guarded Delta MERGEs, SCD Type 2 customers with point-in-time joins, as-of FX conversion, typed quarantine and a retrying Data Pipeline.}
+    \resumeItem{\textbf{Result:} Merged 2,963 order versions into 945 orders, blocked 10 stale updates and matched \$295,585.57 of revenue to the cent with an independent check; re-runs change 0 rows and all 224 tests pass, on about \$2--3 of compute.}
+    \resumeItem{\textbf{Tech Stack:} Microsoft Fabric, PySpark, Spark SQL, Delta Lake, Data Pipelines, Entra ID}
+\resumeItemListEnd
+\vspace{-4pt}
+
+\resumeProjectHeadingWithBoth
+    {\textbf{SmartDialer --- Outbound-Dialer Simulator with Safety Engine}}
+    {https://github.com/sayantansikdar/smartdialer}{https://sayantansikdar.github.io/smartdialer/}{QA / Systems}
+\resumeItemListStart
+    \resumeItem{\textbf{Situation:} A predictive dialer that over-dials must never dial a do-not-call number or leak capacity in an outage.}
+    \resumeItem{\textbf{Action:} Built a TypeScript engine where every dial passes 13 ordered, explainable safety rules, with a variance-guarded pacer, timeout watchdogs and a SHA-256 determinism digest over seeded runs.}
+    \resumeItem{\textbf{Result:} 529 Vitest tests and 35 Cypress--Cucumber BDD scenarios gate every push in CI with 0 do-not-call breaches; a covering index made contact reservation 40x faster at 1,500 agents (722 to 17.9 $\mu$s).}
+    \resumeItem{\textbf{Tech Stack:} TypeScript, Fastify, React, SQLite, Vitest, Cypress, Cucumber, Allure, GitHub Actions}
+\resumeItemListEnd
+\vspace{-4pt}
+
+\resumeProjectHeadingWithRepo
+    {\textbf{Order Supervisor --- Long-Running AI Agent on Temporal}}
+    {https://github.com/sayantansikdar/order-supervisor}{Agentic AI / FDE}
+\resumeItemListStart
+    \resumeItem{\textbf{Situation:} Orders need attention for days (failed payments, delays), but an always-on LLM loop is costly and fragile.}
+    \resumeItem{\textbf{Action:} Gave each order a durable Temporal workflow whose agent wakes on 3 triggers; a rule-based classifier gates events by urgency, and the agent acts through 6 tools with rolling memory.}
+    \resumeItem{\textbf{Result:} A 2.3k-line full-stack POC with 10 REST endpoints that sleeps on durable timers instead of polling, caps history via continue-as-new after 200 turns, and runs keyless via a deterministic mock policy.}
+    \resumeItem{\textbf{Tech Stack:} Python, Temporal, FastAPI, PostgreSQL, SQLAlchemy, Anthropic Claude API, Next.js, Tailwind CSS}
+\resumeItemListEnd
+\vspace{-4pt}
+
+\resumeProjectHeadingWithRepo
+    {\textbf{EmpaChat --- Empathetic Response AI}}
+    {https://github.com/sayantansikdar/empathetic-ai}{LLM Fine-Tuning}
+\resumeItemListStart
+    \resumeItem{\textbf{Situation:} Chatbots answer distressed users in a flat tone, and fully fine-tuning a 1.5B model exceeded one GPU.}
+    \resumeItem{\textbf{Action:} Fine-tuned GPT-2 XL with LoRA (r = 8) and 4-bit QLoRA on 58K GoEmotions comments as an emotion classifier plus an emotion-conditioned generator, served via FastAPI and Gradio.}
+    \resumeItem{\textbf{Result:} Trained 8.4M of 1.56B parameters (a 99.4\% reduction) for about 89\% classification accuracy at about 150 ms GPU latency, and a 35\% preference gain over the baseline in a simulated A/B test.}
+    \resumeItem{\textbf{Tech Stack:} PyTorch, HuggingFace Transformers, PEFT (LoRA/QLoRA), FastAPI, Gradio, Docker}
+\resumeItemListEnd
+\vspace{-4pt}
+
+\resumeProjectHeadingWithRepo
+    {\textbf{Basket Trading Optimization Framework}}
+    {https://github.com/sayantansikdar/Advanced-Basket-Trading-Optimization-Framework}{Quant ML}
+\resumeItemListStart
+    \resumeItem{\textbf{Situation:} Johansen-test cointegration weights look good in-sample but often lose money on unseen data.}
+    \resumeItem{\textbf{Action:} Extended a Bayesian-optimization baseline into a 6-optimizer benchmark (CVFS-CMA-ES, BO, TuRBO, SAASBO, CMA-ES) maximising out-of-sample Sharpe after 0.1\% costs.}
+    \resumeItem{\textbf{Result:} CVFS-CMA-ES reached a 3.851 Sharpe ratio (9x standard CMA-ES's 0.420) with only --3.99\% max drawdown, while Bayesian optimization produced the highest total return at 63.76\%.}
+    \resumeItem{\textbf{Tech Stack:} Python, scikit-optimize, pycma (CMA-ES), Statsmodels, SciPy, Pandas, yfinance}
+\resumeItemListEnd
+\vspace{-4pt}
+
+\resumeProjectHeadingWithRepo
+    {\textbf{Bookie --- End-to-End MLOps Book Recommender}}
+    {https://github.com/sayantansikdar/bookie}{MLOps}
+\resumeItemListStart
+    \resumeItem{Packaged a full recommender lifecycle into one \texttt{docker compose up}: a 4-stage Airflow DAG (ingest, preprocess, train SVD collaborative filtering, evaluate) with DVC data versioning, MLflow experiment tracking, FastAPI serving, a React front end and Prometheus/Grafana monitoring --- 6 services in total.}
+    \resumeItem{\textbf{Tech Stack:} Python, Airflow, DVC, MLflow, FastAPI, React, Docker, Prometheus, Grafana}
+\resumeItemListEnd
+
+\resumeSubHeadingListEnd
+\vspace{-8pt}
+
+%-----------RESEARCH WORK-----------
+\section{Research Work}
+\begin{itemize}[leftmargin=0.15in, label={}]
+    \small{\item{
+     \textbf{Deep Neural Network Based Yield Phenotyping Framework: Fruit Grading and Classification}, \textit{IEEE} \\
+     \textbf{Authors:} Cassandra Chang, Sayantan Sikdar |
+     \textit{\uline{\href{https://ieeexplore.ieee.org/document/10649049}{Link}}}
+    }}
+\end{itemize}
+\vspace{-12pt}
+
+%-----------CERTIFICATIONS AND ACHIEVEMENTS-----------
+\section{Certifications and Achievements}
+\begin{itemize}[leftmargin=0.15in, label={}]
+    \small{\item{
+     Google Cloud Training: Cloud Engineering Fundamentals \& Essentials, Cloud Application Development, Cloud ML-AI, DevOps \& Kubernetes $|$
+     Anthropic: Claude 101, Claude Code 101 $|$
+     NVIDIA: Fundamentals of Deep Learning $|$
+     AWS Machine Learning Scholarship 2021, Udacity -- Recipient $|$
+     GATE CS 2024 -- Qualified $|$
+     Youngest IEEE Student Researcher
+    }}
+\end{itemize}
+\vspace{-1pt}
+
+\end{document}
