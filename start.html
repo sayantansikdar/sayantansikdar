@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sayantan Sikdar | Choose Your Realm</title>
+  <meta name="description" content="Choose your portfolio realm — Dragon Ball Z Light or Bleach Dark. Portfolio of Sayantan Sikdar, AI/ML Engineer.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Montserrat:wght@700;800;900&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body {
+      font-family: 'Poppins', sans-serif; overflow: hidden;
+      background: #000; color: #fff; position: relative;
+    }
+
+    .stage { position: fixed; inset: 0; display: flex; }
+
+    /* ===== Sides ===== */
+    .side {
+      position: relative; flex: 1; overflow: hidden; cursor: pointer;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      text-align: center; padding: 40px; transition: flex 0.6s cubic-bezier(0.4,0,0.2,1);
+    }
+
+    /* DBZ (left) */
+    .side-dbz {
+      background: linear-gradient(160deg, #FFB36B 0%, #F26522 45%, #0054A5 100%);
+      clip-path: polygon(0 0, 100% 0, calc(100% - 90px) 100%, 0 100%);
+    }
+    .side-dbz::before {
+      content: ''; position: absolute; inset: 0; opacity: 0.5; pointer-events: none;
+      background:
+        radial-gradient(60px 40px at 22% 78%, rgba(255,255,255,0.85), transparent 70%),
+        radial-gradient(80px 52px at 38% 86%, rgba(255,255,255,0.8), transparent 70%),
+        radial-gradient(50px 34px at 60% 80%, rgba(255,255,255,0.75), transparent 70%),
+        radial-gradient(40px 28px at 14% 30%, rgba(255,255,255,0.5), transparent 70%);
+      animation: floatClouds 16s ease-in-out infinite;
+    }
+    @keyframes floatClouds { 0%,100% { transform: translateX(0); } 50% { transform: translateX(14px); } }
+
+    /* Bleach (right) */
+    .side-bleach {
+      background: linear-gradient(200deg, #0A0A0A 0%, #111 40%, #0d2236 100%);
+      clip-path: polygon(90px 0, 100% 0, 100% 100%, 0 100%);
+      margin-left: -90px;
+    }
+    .side-bleach::before {
+      content: ''; position: absolute; inset: 0; opacity: 0.35; pointer-events: none;
+      background-image: radial-gradient(circle, #2a2a2a 1px, transparent 1px);
+      background-size: 18px 18px; animation: tone 30s linear infinite;
+    }
+    @keyframes tone { from { background-position: 0 0; } to { background-position: 18px 18px; } }
+
+    /* Glowing split line */
+    .split-glow {
+      position: fixed; top: 0; bottom: 0; left: 50%; width: 6px; z-index: 5;
+      transform: translateX(-50%) skewX(-7deg); pointer-events: none;
+      background: linear-gradient(180deg, transparent, #FFD700 20%, #fff 50%, #4fc3f7 80%, transparent);
+      box-shadow: 0 0 22px rgba(255,255,255,0.8), 0 0 50px rgba(79,195,247,0.5);
+      animation: splitPulse 2.2s ease-in-out infinite;
+    }
+    @keyframes splitPulse { 0%,100% { opacity: 0.8; filter: brightness(1); } 50% { opacity: 1; filter: brightness(1.4); } }
+
+    /* ===== Hover expand ===== */
+    .stage:hover .side { flex: 0.85; }
+    .stage .side:hover { flex: 1.4; }
+
+    /* ===== Content ===== */
+    .side-content { position: relative; z-index: 2; transition: transform 0.5s; }
+    .side:hover .side-content { transform: scale(1.05); }
+
+    .realm-kicker { font-size: 0.8rem; letter-spacing: 0.4em; text-transform: uppercase; font-weight: 700; opacity: 0.85; margin-bottom: 14px; }
+
+    .realm-title-dbz {
+      font-family: 'Bangers', cursive; font-size: clamp(2.4rem, 6vw, 5rem); line-height: 1; letter-spacing: 0.04em;
+      color: #fff; text-shadow: 4px 4px 0 #FFD700, 8px 8px 0 rgba(0,84,165,0.6);
+    }
+    .realm-title-bleach {
+      font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: clamp(2.2rem, 5.5vw, 4.6rem);
+      line-height: 1; letter-spacing: 0.12em; color: #F5F5F5; text-transform: uppercase;
+      text-shadow: 0 0 24px rgba(255,255,255,0.25);
+    }
+    .realm-sub { margin-top: 12px; font-size: 0.78rem; letter-spacing: 0.22em; text-transform: uppercase; font-weight: 600; opacity: 0.9; }
+
+    .realm-version {
+      display: inline-block; margin-top: 22px; padding: 11px 26px; border-radius: 40px;
+      font-weight: 700; font-size: 0.74rem; letter-spacing: 0.18em; text-transform: uppercase;
+      transition: all 0.3s;
+    }
+    .v-dbz { background: #fff; color: #F26522; box-shadow: 0 6px 20px rgba(0,0,0,0.25); }
+    .side-dbz:hover .v-dbz { box-shadow: 0 0 24px rgba(255,215,0,0.9); transform: translateY(-2px); }
+    .v-bleach { background: transparent; color: #F5F5F5; border: 1px solid #555; }
+    .side-bleach:hover .v-bleach { border-color: #fff; box-shadow: 0 0 18px rgba(255,255,255,0.2); }
+
+    /* Power-up flash text */
+    .powerup {
+      position: absolute; z-index: 3; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.6);
+      font-family: 'Bangers', cursive; font-size: clamp(2rem, 7vw, 5.5rem); letter-spacing: 0.05em;
+      opacity: 0; pointer-events: none; white-space: nowrap;
+    }
+    .powerup-dbz { color: #FFD700; text-shadow: 4px 4px 0 #D94E0E, 0 0 30px rgba(255,215,0,0.9); }
+    .powerup-bleach {
+      color: #F5F5F5; font-family: 'Montserrat', sans-serif; font-weight: 900; letter-spacing: 0.2em;
+      text-shadow: 0 0 30px rgba(255,255,255,0.6);
+    }
+    .side-dbz:hover .powerup, .side-bleach:hover .powerup { animation: flashIn 0.7s ease-out forwards; }
+    @keyframes flashIn {
+      0% { opacity: 0; transform: translate(-50%,-50%) scale(0.4) rotate(-6deg); }
+      40% { opacity: 0.95; transform: translate(-50%,-50%) scale(1.1) rotate(-3deg); }
+      100% { opacity: 0.18; transform: translate(-50%,-50%) scale(1) rotate(0); }
+    }
+
+    /* Floating dragon balls (left) */
+    .mini-db {
+      position: absolute; width: 26px; height: 26px; border-radius: 50%; z-index: 1;
+      background: radial-gradient(circle at 32% 28%, #fff7d6, #ffdf6b 30%, #ff9b2e 70%, #e8761a);
+      box-shadow: inset -3px -3px 6px rgba(180,80,0,0.5), 0 4px 10px rgba(230,110,20,0.4);
+      animation: dbBob 6s ease-in-out infinite;
+    }
+    @keyframes dbBob { 0%,100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-16px) rotate(20deg); } }
+
+    /* Hell butterfly (right) */
+    .mini-bfly { position: absolute; z-index: 1; font-size: 1.1rem; filter: grayscale(1) brightness(0.5); opacity: 0.5; animation: bflyFloat 9s ease-in-out infinite; }
+    @keyframes bflyFloat { 0% { transform: translateY(0); opacity: 0; } 25% { opacity: 0.5; } 100% { transform: translateY(-140px) translateX(30px); opacity: 0; } }
+
+    /* Header label */
+    .brand {
+      position: fixed; top: 26px; left: 50%; transform: translateX(-50%); z-index: 10;
+      text-align: center; pointer-events: none;
+    }
+    .brand .name { font-family: 'Bangers', cursive; font-size: 1.5rem; letter-spacing: 0.1em; text-shadow: 2px 2px 0 rgba(0,0,0,0.4); }
+    .brand .tag { font-size: 0.62rem; letter-spacing: 0.32em; text-transform: uppercase; opacity: 0.85; margin-top: 2px; }
+
+    .hint {
+      position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%); z-index: 10;
+      font-size: 0.68rem; letter-spacing: 0.22em; text-transform: uppercase; opacity: 0.65;
+      pointer-events: none; text-align: center;
+    }
+
+    /* ===== Mobile: stack vertically ===== */
+    @media (max-width: 768px) {
+      .stage { flex-direction: column; }
+      .side { padding: 30px 20px; }
+      .side-dbz { clip-path: polygon(0 0, 100% 0, 100% calc(100% - 50px), 0 100%); }
+      .side-bleach { clip-path: polygon(0 50px, 100% 0, 100% 100%, 0 100%); margin-left: 0; margin-top: -50px; }
+      .split-glow { top: 50%; bottom: auto; left: 0; right: 0; width: auto; height: 6px; transform: translateY(-50%) skewY(-3deg);
+        background: linear-gradient(90deg, transparent, #FFD700 20%, #fff 50%, #4fc3f7 80%, transparent); }
+      .stage:hover .side { flex: 1; }
+      .stage .side:hover { flex: 1; }
+      .side:hover .side-content { transform: scale(1); }
+      .side-dbz:hover .powerup, .side-bleach:hover .powerup { animation: none; }
+      .realm-title-dbz, .realm-title-bleach { font-size: 2rem; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="brand">
+    <div class="name">SAYANTAN SIKDAR</div>
+    <div class="tag">Choose Your Realm</div>
+  </div>
+
+  <div class="stage">
+    <!-- LEFT: Dragon Ball Z Light -->
+    <a class="side side-dbz" href="dbz.html" aria-label="Enter Dragon Ball Z Light version">
+      <div class="powerup powerup-dbz">IT'S OVER 9000!!!</div>
+      <div class="side-content">
+        <p class="realm-kicker">Light Version</p>
+        <h1 class="realm-title-dbz">DRAGON<br>BALL Z</h1>
+        <p class="realm-sub">Super Saiyan Data Scientist</p>
+        <span class="realm-version v-dbz">Enter ▸</span>
+      </div>
+    </a>
+
+    <!-- RIGHT: Bleach Dark -->
+    <a class="side side-bleach" href="index.html" aria-label="Enter Bleach Dark version">
+      <div class="powerup powerup-bleach">BANKAI</div>
+      <div class="side-content">
+        <p class="realm-kicker">Dark Version</p>
+        <h1 class="realm-title-bleach">BLEACH</h1>
+        <p class="realm-sub">Data Shinigami</p>
+        <span class="realm-version v-bleach">◂ Enter</span>
+      </div>
+    </a>
+  </div>
+
+  <div class="split-glow"></div>
+  <p class="hint">Pick a side · Both lead to the same warrior</p>
+
+  <script>
+    // Floating dragon balls on the DBZ side
+    const dbzSide = document.querySelector('.side-dbz');
+    for (let i = 0; i < 5; i++) {
+      const db = document.createElement('span');
+      db.className = 'mini-db';
+      db.style.left = (8 + Math.random() * 70) + '%';
+      db.style.top = (12 + Math.random() * 70) + '%';
+      db.style.animationDelay = (Math.random() * 4) + 's';
+      db.style.animationDuration = (5 + Math.random() * 3) + 's';
+      dbzSide.appendChild(db);
+    }
+
+    // Hell butterflies on the Bleach side
+    const bleachSide = document.querySelector('.side-bleach');
+    for (let i = 0; i < 5; i++) {
+      const b = document.createElement('span');
+      b.className = 'mini-bfly';
+      b.textContent = '🦋';
+      b.style.left = (10 + Math.random() * 75) + '%';
+      b.style.bottom = (10 + Math.random() * 40) + '%';
+      b.style.animationDelay = (Math.random() * 6) + 's';
+      bleachSide.appendChild(b);
+    }
+
+    // Keyboard shortcuts: ← Bleach, → DBZ
+    document.addEventListener('keydown', e => {
+      if (e.key === 'ArrowLeft') window.location.href = 'dbz.html';
+      if (e.key === 'ArrowRight') window.location.href = 'index.html';
+    });
+  </script>
+</body>
+
+</html>

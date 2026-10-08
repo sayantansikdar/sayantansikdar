@@ -1,367 +1,707 @@
- // ========== BLEACH PORTFOLIO — SPIRITUAL PRESSURE ENGINE v2 ==========
+/* =========================================================================
+   Sayantan Sikdar — motion engine
+   A small attribute-driven engine in the spirit of StringTune: JS measures
+   the page and writes CSS variables; styles.css decides what they look like.
 
-// ===== Loading Screen — Soul Society Gate =====
-window.addEventListener('load', () => {
-  setTimeout(() => {
-    const ls = document.getElementById('loadingScreen');
-    ls.classList.add('open');
-    setTimeout(() => { ls.style.display = 'none'; }, 1400);
-  }, 1200);
-});
+   data-split="chars|words"   split text into .w / .c spans with --i and --n
+   data-progress[="id"]       write --p (0→1) between data-start / data-end
+                              ("top 0.8" = element top at 80% of viewport)
+   data-reveal                add .is-in once the element enters view
+   data-roll                  hover char-roll on links and buttons
+   data-magnetic[="0.35"]     element leans toward the pointer
+   data-spotlight             --sx / --sy follow the pointer
+   data-cursor="Label"        cursor ring grows and shows a label
+   data-count="6"             count up when revealed
+   ========================================================================= */
+(() => {
+  'use strict';
 
-// ===== Custom Cursor + Spirit Particle Trail =====
-const cursor = document.getElementById('cursor');
-const trail = document.getElementById('cursorTrail');
-let mouseX = 0, mouseY = 0, trailX = 0, trailY = 0;
+  const doc = document.documentElement;
+  const motion = !doc.classList.contains('reduced');
+  const finePointer = matchMedia('(hover: hover) and (pointer: fine)').matches;
 
-if (window.innerWidth > 768) {
-  document.addEventListener('mousemove', e => {
-    mouseX = e.clientX; mouseY = e.clientY;
-    cursor.style.left = mouseX + 'px';
-    cursor.style.top = mouseY + 'px';
-    if (Math.random() < 0.25) createSpiritParticle(mouseX, mouseY);
-  });
+  const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+  const lerp = (a, b, t) => a + (b - a) * t;
+  const easeInOut = t => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+  const easeOut = t => 1 - Math.pow(1 - t, 3);
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 
-  function animateTrail() {
-    trailX += (mouseX - trailX) * 0.15;
-    trailY += (mouseY - trailY) * 0.15;
-    trail.style.left = trailX + 'px';
-    trail.style.top = trailY + 'px';
-    requestAnimationFrame(animateTrail);
+  let vw = innerWidth;
+  let vh = innerHeight;
+  let sy = scrollY;
+  let lastSy = sy;
+  let velocity = 0;
+
+  /* ---------------------------------------------------------------------
+     Split text
+     --------------------------------------------------------------------- */
+  function splitText(el, mode) {
+    const label = el.textContent.replace(/\s+/g, ' ').trim();
+    const named = el.closest('[aria-label], [aria-hidden="true"]');
+    const out = document.createElement('span');
+    out.setAttribute('aria-hidden', 'true');
+    let ci = 0;
+    let wi = 0;
+
+    const build = (node, target) => {
+      node.childNodes.forEach(child => {
+        if (child.nodeType === Node.TEXT_NODE) {
+          child.textContent.split(/(\s+)/).forEach(part => {
+            if (!part) return;
+            if (/^\s+$/.test(part)) {
+              target.appendChild(document.createTextNode(' '));
+              return;
+            }
+            const w = document.createElement('span');
+            w.className = 'w';
+            if (mode === 'chars') {
+              for (const ch of part) {
+                const c = document.createElement('span');
+                c.className = 'c';
+                c.textContent = ch;
+                c.style.setProperty('--i', ci++);
+                w.appendChild(c);
+              }
+            } else {
+              w.textContent = part;
+              w.style.setProperty('--i', wi);
+            }
+            wi++;
+            target.appendChild(w);
+          });
+        } else if (child.nodeType === Node.ELEMENT_NODE) {
+          const clone = child.cloneNode(false);
+          build(child, clone);
+          target.appendChild(clone);
+        }
+      });
+    };
+
+    build(el, out);
+    el.style.setProperty('--n', mode === 'chars' ? ci : wi);
+    el.textContent = '';
+    if (!named) {
+      const sr = document.createElement('span');
+      sr.className = 'sr-only';
+      sr.textContent = label;
+      el.appendChild(sr);
+    }
+    el.appendChild(out);
   }
-  animateTrail();
 
-  const clickables = document.querySelectorAll('a, button, .btn, .skill-tag, .project-card, input, textarea');
-  clickables.forEach(el => {
-    el.addEventListener('mouseenter', () => cursor.classList.add('hover'));
-    el.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
-  });
-
-  function createSpiritParticle(x, y) {
-    const p = document.createElement('div');
-    p.style.cssText = `position:fixed;left:${x}px;top:${y}px;z-index:9999;width:3px;height:3px;background:rgba(255,255,255,0.5);border-radius:50%;pointer-events:none;transition:all 1s ease-out;`;
-    document.body.appendChild(p);
-    requestAnimationFrame(() => {
-      p.style.transform = `translate(${(Math.random()-0.5)*60}px, ${(Math.random()-0.5)*60}px)`;
-      p.style.opacity = '0';
+  function rollify(el) {
+    const text = el.textContent.trim();
+    el.textContent = '';
+    const sr = document.createElement('span');
+    sr.className = 'sr-only';
+    sr.textContent = text;
+    const roll = document.createElement('span');
+    roll.className = 'roll';
+    roll.setAttribute('aria-hidden', 'true');
+    [...text].forEach((ch, i) => {
+      const c = document.createElement('span');
+      c.className = 'c';
+      c.textContent = ch === ' ' ? ' ' : ch;
+      c.style.setProperty('--i', i);
+      roll.appendChild(c);
     });
-    setTimeout(() => p.remove(), 1000);
+    el.append(sr, roll);
   }
-}
 
-// ===== Typing Animation =====
-const typingPhrases = [
-  "build scalable ML solutions.",
-  "love time-series forecasting.",
-  "engineer LLM pipelines.",
-  "optimize with Bayesian methods.",
-  "publish research at IEEE.",
-  "craft intelligent AI systems.",
-  "wield Zangetsu on data."
-];
-let phraseIdx = 0, charIdx = 0, isDeleting = false;
-const typingEl = document.getElementById('typingText');
+  $$('[data-split]').forEach(el => splitText(el, el.dataset.split || 'chars'));
+  if (finePointer) $$('[data-roll]').forEach(rollify);
 
-function typeEffect() {
-  const current = typingPhrases[phraseIdx];
-  if (isDeleting) {
-    typingEl.textContent = current.substring(0, charIdx--);
-    if (charIdx < 0) { isDeleting = false; phraseIdx = (phraseIdx + 1) % typingPhrases.length; }
-    setTimeout(typeEffect, 25);
-  } else {
-    typingEl.textContent = current.substring(0, charIdx++);
-    if (charIdx > current.length) { isDeleting = true; setTimeout(typeEffect, 2000); }
-    else setTimeout(typeEffect, 55);
+  /* ---------------------------------------------------------------------
+     Smooth scroll
+     --------------------------------------------------------------------- */
+  let lenis = null;
+  if (motion && typeof window.Lenis === 'function') {
+    lenis = new window.Lenis({ lerp: 0.085, smoothWheel: true, wheelMultiplier: 1 });
   }
-}
-typeEffect();
 
-// ===== Navbar =====
-const navbar = document.getElementById('navbar');
-window.addEventListener('scroll', () => {
-  navbar.classList.toggle('scrolled', window.scrollY > 30);
-});
-
-const hamburger = document.getElementById('hamburger');
-const navLinks = document.getElementById('navLinks');
-hamburger.addEventListener('click', () => navLinks.classList.toggle('active'));
-navLinks.querySelectorAll('a').forEach(link => {
-  link.addEventListener('click', () => navLinks.classList.remove('active'));
-});
-
-// ===== Scroll Animations =====
-const observer = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) { entry.target.classList.add('visible'); observer.unobserve(entry.target); }
-  });
-}, { threshold: 0.12, rootMargin: '0px 0px -30px 0px' });
-document.querySelectorAll('[data-aos]').forEach(el => observer.observe(el));
-
-const slashObserver = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) { entry.target.classList.add('visible'); slashObserver.unobserve(entry.target); }
-  });
-}, { threshold: 0.5 });
-document.querySelectorAll('.sword-slash-divider').forEach(el => slashObserver.observe(el));
-
-// ===== Stats Counter =====
-let statsCounted = false;
-const statCards = document.querySelectorAll('.stat-card');
-function animateCounters() {
-  statCards.forEach(card => {
-    const target = parseInt(card.dataset.count);
-    const numEl = card.querySelector('.stat-number');
-    const duration = 1500, start = performance.now();
-    function update(now) {
-      const progress = Math.min((now - start) / duration, 1);
-      const current = Math.floor((1 - Math.pow(1 - progress, 3)) * target);
-      numEl.textContent = current;
-      if (progress < 1) requestAnimationFrame(update);
-      else numEl.textContent = target;
+  function scrollToTarget(target) {
+    const el = typeof target === 'string' ? (target === '#top' ? 0 : $(target)) : target;
+    if (el === null) return;
+    if (lenis) {
+      lenis.scrollTo(el, { duration: 1.6, easing: t => 1 - Math.pow(1 - t, 4) });
+    } else if (el === 0) {
+      scrollTo({ top: 0, behavior: motion ? 'smooth' : 'auto' });
+    } else {
+      el.scrollIntoView({ behavior: motion ? 'smooth' : 'auto' });
     }
-    requestAnimationFrame(update);
-  });
-}
-const statsGrid = document.querySelector('.stats-grid');
-if (statsGrid) {
-  new IntersectionObserver((entries) => {
-    entries.forEach(entry => { if (entry.isIntersecting && !statsCounted) { statsCounted = true; animateCounters(); } });
-  }, { threshold: 0.3 }).observe(statsGrid);
-}
-
-// ===== Manga SFX =====
-const sfxOverlay = document.getElementById('sfxOverlay');
-const sfxTexts = ['BANKAI', 'SWISH', 'CLANG', '斬月', 'SLASH', '卍解'];
-let sfxCooldown = false;
-
-function showSFX(text, x, y) {
-  if (sfxCooldown) return;
-  sfxCooldown = true;
-  sfxOverlay.textContent = text || sfxTexts[Math.floor(Math.random() * sfxTexts.length)];
-  sfxOverlay.style.left = (x || window.innerWidth / 2) - 100 + 'px';
-  sfxOverlay.style.top = (y || window.innerHeight / 2) - 50 + 'px';
-  sfxOverlay.classList.remove('show');
-  void sfxOverlay.offsetWidth;
-  sfxOverlay.classList.add('show');
-  setTimeout(() => { sfxCooldown = false; }, 2000);
-}
-
-document.querySelectorAll('.project-card').forEach(card => {
-  card.addEventListener('mouseenter', e => showSFX(null, e.clientX, e.clientY));
-});
-
-// ===== Reiatsu Particles in Hero =====
-const particleContainer = document.getElementById('reiatsuParticles');
-for (let i = 0; i < 30; i++) {
-  const p = document.createElement('div');
-  const size = Math.random() * 3 + 1;
-  p.style.cssText = `position:absolute;left:${Math.random()*100}%;bottom:-10px;width:${size}px;height:${size}px;background:rgba(255,255,255,${Math.random()*0.2+0.05});border-radius:50%;animation:particleRise ${Math.random()*6+4}s ${Math.random()*4}s linear infinite;pointer-events:none;`;
-  particleContainer.appendChild(p);
-}
-const pStyle = document.createElement('style');
-pStyle.textContent = `@keyframes particleRise{0%{transform:translateY(0);opacity:0}10%{opacity:1}90%{opacity:1}100%{transform:translateY(-100vh) translateX(${Math.random()*40-20}px);opacity:0}}`;
-document.head.appendChild(pStyle);
-
-// ===== Hell Butterflies =====
-const butterfliesContainer = document.getElementById('hellButterflies');
-for (let i = 0; i < 5; i++) {
-  const b = document.createElement('span');
-  b.className = 'hell-butterfly';
-  b.textContent = '🦋';
-  b.style.left = Math.random() * 100 + '%';
-  b.style.animationDelay = Math.random() * 6 + 's';
-  b.style.animationDuration = (6 + Math.random() * 4) + 's';
-  b.style.filter = 'grayscale(1) brightness(0.4)';
-  butterfliesContainer.appendChild(b);
-}
-
-// ===== Contact Form =====
-document.getElementById('contactForm').addEventListener('submit', e => {
-  e.preventDefault();
-  showSFX('送信完了', window.innerWidth / 2, window.innerHeight / 2);
-  const btn = e.target.querySelector('button[type="submit"]');
-  btn.querySelector('.btn-text').textContent = '卍 Message Sent!';
-  setTimeout(() => { btn.querySelector('.btn-text').textContent = 'Send Hell Butterfly'; e.target.reset(); }, 3000);
-});
-
-
-
-// ===== Active Nav Link =====
-const sections = document.querySelectorAll('section[id]');
-window.addEventListener('scroll', () => {
-  const scrollPos = window.scrollY + 150;
-  sections.forEach(section => {
-    const top = section.offsetTop, height = section.offsetHeight;
-    const id = section.getAttribute('id');
-    const link = document.querySelector(`.nav-links a[href="#${id}"]`);
-    if (link) link.style.color = (scrollPos >= top && scrollPos < top + height) ? '#F5F5F5' : '';
-  });
-});
-
-
-// ================================================================
-// ===== ICHIGO EVOLUTION ENGINE — Scroll-Based Transformation =====
-// ================================================================
-
-const ichigoContainer = document.getElementById('ichigoContainer');
-const ichigoLabel = document.getElementById('ichigoLabel');
-const ichigoParticlesEl = document.getElementById('ichigoParticles');
-
-// SVG element groups
-const shikaiSword = document.querySelector('.ichigo-zangetsu-shikai');
-const bankaiCoat = document.querySelector('.ichigo-bankai-coat');
-const tensaZangetsu = document.querySelector('.ichigo-tensa-zangetsu');
-const hollowMask = document.querySelector('.ichigo-hollow-mask');
-const mugetsuHair = document.querySelector('.ichigo-mugetsu-hair');
-const normalHair = document.querySelector('.ichigo-hair');
-const ichigoRobe = document.querySelector('.ichigo-robe');
-const ichigoEyes = document.querySelectorAll('.ichigo-pupil');
-const ichigoAura1 = document.querySelector('.ichigo-aura-1');
-const ichigoAura2 = document.querySelector('.ichigo-aura-2');
-
-const stageLabels = [
-  'SUBSTITUTE SHINIGAMI',
-  'SHIKAI — ZANGETSU',
-  'BANKAI — TENSA ZANGETSU',
-  'VIZARD — HOLLOW MASK',
-  'MUGETSU — FINAL GETSUGA'
-];
-
-let currentStage = 0;
-let particleInterval = null;
-
-function getScrollStage() {
-  const scrollTop = window.scrollY;
-  const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-  const pct = Math.min(scrollTop / docHeight, 1);
-  if (pct < 0.15) return 0;      // Hero
-  if (pct < 0.35) return 1;      // Skills — Shikai
-  if (pct < 0.55) return 2;      // Projects — Bankai
-  if (pct < 0.78) return 3;      // Experience — Vizard
-  return 4;                       // Footer — Mugetsu
-}
-
-function setOpacity(el, val) { if (el) el.style.opacity = val; }
-
-function applyStage(stage) {
-  // Reset all layers
-  setOpacity(shikaiSword, 0);
-  setOpacity(bankaiCoat, 0);
-  setOpacity(tensaZangetsu, 0);
-  setOpacity(hollowMask, 0);
-  setOpacity(mugetsuHair, 0);
-  setOpacity(normalHair, 1);
-  setOpacity(ichigoAura1, 0);
-  setOpacity(ichigoAura2, 0);
-
-  // Reset robe color
-  if (ichigoRobe) { ichigoRobe.style.stroke = '#E0E0E0'; ichigoRobe.style.fill = 'none'; }
-  ichigoEyes.forEach(e => { e.style.fill = '#0A0A0A'; e.setAttribute('r', '2.5'); });
-
-  // Remove old stage classes
-  for (let i = 1; i <= 5; i++) ichigoContainer.classList.remove('stage-' + i);
-  ichigoContainer.classList.add('stage-' + (stage + 1));
-
-  // Apply stage-specific transforms
-  switch (stage) {
-    case 0: // Substitute Shinigami — base
-      break;
-    case 1: // Shikai
-      setOpacity(shikaiSword, 1);
-      setOpacity(ichigoAura1, 0.15);
-      break;
-    case 2: // Bankai
-      setOpacity(tensaZangetsu, 1);
-      setOpacity(bankaiCoat, 1);
-      setOpacity(ichigoAura1, 0.3);
-      setOpacity(ichigoAura2, 0.15);
-      if (ichigoRobe) { ichigoRobe.style.stroke = '#fff'; }
-      break;
-    case 3: // Vizard / Hollow Mask
-      setOpacity(tensaZangetsu, 1);
-      setOpacity(bankaiCoat, 1);
-      setOpacity(hollowMask, 1);
-      setOpacity(ichigoAura1, 0.5);
-      setOpacity(ichigoAura2, 0.3);
-      if (ichigoRobe) { ichigoRobe.style.stroke = '#fff'; }
-      ichigoEyes.forEach(e => { e.style.fill = '#FFD700'; e.setAttribute('r', '3'); });
-      break;
-    case 4: // Mugetsu
-      setOpacity(mugetsuHair, 1);
-      setOpacity(normalHair, 0);
-      setOpacity(bankaiCoat, 1);
-      setOpacity(ichigoAura1, 0.7);
-      setOpacity(ichigoAura2, 0.5);
-      if (ichigoRobe) { ichigoRobe.style.stroke = '#555'; ichigoRobe.style.fill = 'rgba(30,30,30,0.6)'; }
-      ichigoEyes.forEach(e => { e.style.fill = '#000'; e.setAttribute('r', '4'); });
-      break;
+    if (el && el !== 0) {
+      if (!el.hasAttribute('tabindex')) el.setAttribute('tabindex', '-1');
+      el.focus({ preventScroll: true });
+    }
   }
 
-  ichigoLabel.textContent = stageLabels[stage];
-  updateIchigoParticles(stage);
-}
+  document.addEventListener('click', e => {
+    const a = e.target.closest('a[href^="#"]');
+    if (!a) return;
+    const hash = a.getAttribute('href');
+    if (hash === '#' || (hash !== '#top' && !$(hash))) return;
+    e.preventDefault();
+    closeMenu(false);
+    scrollToTarget(hash);
+  });
 
-function updateIchigoParticles(stage) {
-  // Clear old
-  if (particleInterval) clearInterval(particleInterval);
-  ichigoParticlesEl.innerHTML = '';
+  /* ---------------------------------------------------------------------
+     Progress tracks
+     --------------------------------------------------------------------- */
+  const parseEdge = (s, fallback) => {
+    const [edge, f] = (s || fallback).trim().split(/\s+/);
+    return { edge, f: parseFloat(f) };
+  };
 
-  const density = [2, 5, 10, 16, 25][stage]; // particles per batch
-  const colors = stage < 3 ? ['#fff', '#ccc'] : stage === 3 ? ['#fff', '#ccc', '#ff4444'] : ['#333', '#555', '#fff'];
+  const tracks = $$('[data-progress]').map(el => ({
+    el,
+    id: el.dataset.progress || null,
+    start: parseEdge(el.dataset.start, 'top 1'),
+    end: parseEdge(el.dataset.end, 'bottom 0'),
+    a: 0,
+    b: 1,
+    p: -1,
+  }));
 
-  particleInterval = setInterval(() => {
-    if (ichigoParticlesEl.children.length > 40) return; // cap
-    for (let i = 0; i < density / 3; i++) {
-      const p = document.createElement('div');
-      p.className = 'ichigo-particle';
-      const s = Math.random() * 3 + 1;
-      const c = colors[Math.floor(Math.random() * colors.length)];
-      const x = Math.random() * 220 - 30;
-      const y = Math.random() * 380;
-      p.style.cssText = `left:${x}px;top:${y}px;width:${s}px;height:${s}px;background:${c};opacity:0;animation-delay:${Math.random()*2}s;animation-duration:${2+Math.random()*3}s;`;
-      ichigoParticlesEl.appendChild(p);
-      setTimeout(() => p.remove(), 5000);
-    }
-  }, 600);
-}
-
-function onIchigoScroll() {
-  const newStage = getScrollStage();
-  if (newStage !== currentStage) {
-    // Trigger transition burst
-    ichigoContainer.classList.add('transitioning');
-    setTimeout(() => ichigoContainer.classList.remove('transitioning'), 400);
-    // Show SFX for major transitions
-    if (newStage > currentStage && newStage >= 2) {
-      const sfxMap = ['', '', 'BANKAI', '虚化', '無月'];
-      showSFX(sfxMap[newStage], window.innerWidth - 200, window.innerHeight / 2);
-    }
-    currentStage = newStage;
-    applyStage(currentStage);
+  function measureTracks() {
+    tracks.forEach(t => {
+      const r = t.el.getBoundingClientRect();
+      const top = r.top + sy;
+      const at = edge => (edge.edge === 'bottom' ? top + r.height : top) - vh * edge.f;
+      t.a = at(t.start);
+      t.b = at(t.end);
+      if (t.b <= t.a) t.b = t.a + 1;
+      t.p = -1;
+    });
   }
-}
 
-// Getsuga Tensho hover interaction
-if (window.innerWidth > 768) {
-  // Create getsuga slash overlay
-  const getsugaSlash = document.createElement('div');
-  getsugaSlash.className = 'ichigo-getsuga-slash';
-  document.body.appendChild(getsugaSlash);
+  const hooks = {};
 
-  ichigoContainer.style.pointerEvents = 'auto';
-  ichigoContainer.addEventListener('mouseenter', () => {
-    cursor && cursor.classList.add('hover');
-    getsugaSlash.classList.remove('active');
-    void getsugaSlash.offsetWidth;
-    getsugaSlash.classList.add('active');
-    showSFX('月牙天衝', window.innerWidth / 2, window.innerHeight / 2);
-    setTimeout(() => getsugaSlash.classList.remove('active'), 700);
+  function updateTracks() {
+    for (const t of tracks) {
+      const p = clamp((sy - t.a) / (t.b - t.a));
+      if (Math.abs(p - t.p) < 0.0001) continue;
+      t.p = p;
+      t.el.style.setProperty('--p', p.toFixed(4));
+      if (t.id && hooks[t.id]) hooks[t.id](p);
+    }
+  }
+
+  /* ---------------------------------------------------------------------
+     Hero — the headline tile grows into the full portrait
+     --------------------------------------------------------------------- */
+  const stage = $('#heroStage');
+  const slot = $('#heroSlot');
+  const portrait = $('#portrait');
+  const hero = { x0: 0, y0: 0, s0: 1, X: 0, Y: 0, S: 1, e: 0 };
+
+  function measureHero() {
+    if (!motion || !stage) return;
+    const st = stage.getBoundingClientRect();
+    const sr = slot.getBoundingClientRect();
+    const W = stage.clientWidth;
+    const H = stage.clientHeight;
+    const mobile = W < 760;
+    const S = Math.round(mobile ? Math.min(W - 32, H * 0.56) : Math.min(H * 0.66, W * 0.46));
+    Object.assign(hero, {
+      x0: sr.left - st.left,
+      y0: sr.top - st.top,
+      s0: Math.max(sr.width, 1),
+      X: Math.round((W - S) / 2),
+      Y: Math.round((H - S) / 2 + (mobile ? 24 : 14)),
+      S,
+    });
+    stage.style.setProperty('--px', hero.X + 'px');
+    stage.style.setProperty('--py', hero.Y + 'px');
+    stage.style.setProperty('--ps', hero.S + 'px');
+  }
+
+  hooks.hero = p => {
+    const e = easeInOut(clamp(p / 0.6));
+    const d = easeOut(clamp((p - 0.5) / 0.3));
+    hero.e = e;
+    const sc = lerp(hero.s0 / hero.S, 1, e);
+    const tx = lerp(hero.x0 + hero.s0 / 2 - (hero.X + hero.S / 2), 0, e);
+    const ty = lerp(hero.y0 + hero.s0 / 2 - (hero.Y + hero.S / 2), 0, e);
+    const s = stage.style;
+    s.setProperty('--e', e.toFixed(4));
+    s.setProperty('--d', d.toFixed(4));
+    s.setProperty('--sc', sc.toFixed(5));
+    s.setProperty('--tx', tx.toFixed(2) + 'px');
+    s.setProperty('--ty', ty.toFixed(2) + 'px');
+    s.setProperty('--rad', lerp(8, 3, e).toFixed(2) + 'px');
+  };
+
+  /* Portrait lens: grayscale ink, colour shows through a lens.
+     Idle, the lens rests on the hollow's gold eye. */
+  const EYE = { x: 62.4, y: 33.6 };
+  const lens = { x: EYE.x, y: EYE.y, r: 150, tx: EYE.x, ty: EYE.y, hover: false, open: false };
+
+  if (portrait) {
+    portrait.addEventListener('pointermove', e => {
+      const r = portrait.getBoundingClientRect();
+      lens.tx = ((e.clientX - r.left) / r.width) * 100;
+      lens.ty = ((e.clientY - r.top) / r.height) * 100;
+      lens.hover = e.pointerType === 'mouse';
+    });
+    portrait.addEventListener('pointerleave', () => {
+      lens.hover = false;
+      lens.tx = EYE.x;
+      lens.ty = EYE.y;
+    });
+    portrait.addEventListener('click', () => { lens.open = !lens.open; });
+  }
+
+  function updatePortrait(now) {
+    if (!motion || !portrait || sy > vh * 3) return;
+    const expanded = hero.e > 0.98;
+    const base = lerp(150, 0, clamp(hero.e * 1.1));
+    let active = 9 + Math.sin(now / 900) * 1.5;
+    if (lens.hover && expanded) active = 22;
+    if (lens.open) active = 150;
+    const target = Math.max(base, active);
+    if (!lens.hover) {
+      lens.tx = EYE.x;
+      lens.ty = EYE.y;
+    }
+    lens.x = lerp(lens.x, lens.tx, 0.14);
+    lens.y = lerp(lens.y, lens.ty, 0.14);
+    lens.r = lerp(lens.r, target, base > active ? 1 : 0.1);
+    if (finePointer) cursor.classList.toggle('is-lens', lens.hover && expanded);
+    const ps = portrait.style;
+    ps.setProperty('--mx', lens.x.toFixed(2) + '%');
+    ps.setProperty('--my', lens.y.toFixed(2) + '%');
+    ps.setProperty('--lens', lens.r.toFixed(2));
+  }
+
+  /* Ember shards — pushed by the pointer, sprung back home */
+  const shards = $$('.shard').map((el, i) => ({ el, x: 0, y: 0, vx: 0, vy: 0, r: 0, vr: 0, cx: 0, cy: 0, ph: i * 1.7 }));
+  const pointer = { x: -999, y: -999, vx: 0, vy: 0 };
+
+  function measureShards() {
+    shards.forEach(s => {
+      s.el.style.translate = '0px 0px';
+      const r = s.el.getBoundingClientRect();
+      s.cx = r.left + r.width / 2;
+      s.cy = r.top + r.height / 2;
+    });
+  }
+
+  function updateShards(now, dt) {
+    if (!motion || !shards.length || sy > vh * 3) return;
+    const pinned = sy < stage.parentElement.offsetHeight - vh;
+    for (const s of shards) {
+      if (pinned) {
+        const dx = s.cx + s.x - pointer.x;
+        const dy = s.cy + s.y - pointer.y;
+        const dist = Math.hypot(dx, dy);
+        if (dist < 150) {
+          const f = (1 - dist / 150) * 0.9;
+          s.vx += (pointer.vx * 0.35 + (dx / (dist || 1)) * 3) * f;
+          s.vy += (pointer.vy * 0.35 + (dy / (dist || 1)) * 3) * f;
+          s.vr += (pointer.vx - pointer.vy) * 0.25 * f;
+        }
+      }
+      s.vx += -s.x * 0.035 * dt;
+      s.vy += -s.y * 0.035 * dt;
+      s.vr += -s.r * 0.03 * dt;
+      s.vx *= 0.9;
+      s.vy *= 0.9;
+      s.vr *= 0.9;
+      s.x += s.vx * dt;
+      s.y += s.vy * dt;
+      s.r += s.vr * dt;
+      const float = Math.sin(now / 1400 + s.ph) * 7;
+      s.el.style.translate = `${s.x.toFixed(1)}px ${(s.y + float).toFixed(1)}px`;
+      s.el.style.rotate = `${s.r.toFixed(1)}deg`;
+    }
+  }
+
+  /* ---------------------------------------------------------------------
+     Focus — three phrases scrubbed by scroll
+     --------------------------------------------------------------------- */
+  const focusLines = $$('.focus__line[data-range]').map(el => {
+    const [a, b] = el.dataset.range.split(',').map(Number);
+    return { el, a, b, hold: el.hasAttribute('data-hold'), q: -1 };
   });
-  ichigoContainer.addEventListener('mouseleave', () => {
-    cursor && cursor.classList.remove('hover');
-  });
-}
 
-// Init Ichigo
-window.addEventListener('scroll', onIchigoScroll, { passive: true });
-applyStage(0);
+  hooks.focus = p => {
+    focusLines.forEach(l => {
+      let q = clamp((p - l.a) / (l.b - l.a));
+      if (l.hold) q = Math.min(q, 0.5);
+      if (q !== l.q) {
+        l.q = q;
+        l.el.style.setProperty('--q', q.toFixed(4));
+      }
+    });
+  };
+
+  /* ---------------------------------------------------------------------
+     Reveal + counters
+     --------------------------------------------------------------------- */
+  function countUp(el) {
+    const to = parseFloat(el.dataset.count);
+    if (!motion) { el.textContent = to; return; }
+    const t0 = performance.now();
+    const step = now => {
+      const t = clamp((now - t0) / 1400);
+      el.textContent = Math.round(easeOut(t) * to);
+      if (t < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }
+
+  const revealIO = new IntersectionObserver(entries => {
+    let batch = 0;
+    entries.forEach(en => {
+      if (!en.isIntersecting) return;
+      const el = en.target;
+      if (!el.hasAttribute('data-split') && !el.style.getPropertyValue('--d')) el.style.setProperty('--d', batch++);
+      el.classList.add('is-in');
+      $$('[data-count]', el).forEach(countUp);
+      revealIO.unobserve(el);
+    });
+  }, { rootMargin: '0px 0px -8% 0px', threshold: 0.12 });
+
+  $$('[data-reveal]').forEach(el => {
+    if (motion) revealIO.observe(el);
+    else {
+      el.classList.add('is-in');
+      $$('[data-count]', el).forEach(countUp);
+    }
+  });
+
+  /* ---------------------------------------------------------------------
+     Velocity marquee
+     --------------------------------------------------------------------- */
+  const marquee = $('#marquee');
+  const mq = { x: 0, half: 0, skew: 0, dir: -1, visible: false };
+  if (marquee && motion) {
+    marquee.innerHTML += marquee.innerHTML;
+    new IntersectionObserver(([en]) => { mq.visible = en.isIntersecting; }).observe(marquee);
+  }
+  const measureMarquee = () => { if (marquee) mq.half = marquee.scrollWidth / 2; };
+
+  function updateMarquee(dt) {
+    if (!motion || !mq.visible || !mq.half) return;
+    if (Math.abs(velocity) > 0.5) mq.dir = velocity > 0 ? -1 : 1;
+    mq.x += mq.dir * (1.1 + Math.abs(velocity) * 0.6) * dt;
+    if (mq.x <= -mq.half) mq.x += mq.half;
+    if (mq.x > 0) mq.x -= mq.half;
+    mq.skew = lerp(mq.skew, clamp(-velocity * 0.35, -10, 10), 0.12);
+    marquee.style.transform = `translate3d(${mq.x.toFixed(2)}px,0,0) skewX(${mq.skew.toFixed(2)}deg)`;
+  }
+
+  /* ---------------------------------------------------------------------
+     Cursor, magnetic, spotlight, metric card
+     --------------------------------------------------------------------- */
+  const cursor = $('#cursor');
+  const ring = $('.cursor__ring', cursor);
+  const dot = $('.cursor__dot', cursor);
+  const cursorLabel = $('#cursorLabel');
+  const ringPos = { x: -100, y: -100 };
+  const metric = $('#metricFloat');
+  const metricPos = { x: 0, y: 0 };
+  let metricOn = false;
+
+  if (finePointer) {
+    doc.classList.add('has-cursor');
+    let lastX = 0;
+    let lastY = 0;
+
+    addEventListener('pointermove', e => {
+      if (e.pointerType !== 'mouse') return;
+      pointer.vx = e.clientX - lastX;
+      pointer.vy = e.clientY - lastY;
+      lastX = pointer.x = e.clientX;
+      lastY = pointer.y = e.clientY;
+      if (ringPos.x < -50) { ringPos.x = pointer.x; ringPos.y = pointer.y; }
+      cursor.classList.remove('is-hidden');
+    }, { passive: true });
+
+    document.addEventListener('pointerleave', () => cursor.classList.add('is-hidden'));
+
+    document.addEventListener('pointerover', e => {
+      const t = e.target;
+      const labelled = t.closest('[data-cursor]');
+      const lensEl = t.closest('[data-cursor-lens]');
+      const link = t.closest('a, button, label, [data-magnetic]');
+      cursor.classList.toggle('is-label', !!labelled);
+      cursor.classList.toggle('is-link', !labelled && !lensEl && !!link);
+      if (labelled) cursorLabel.textContent = labelled.dataset.cursor;
+    });
+
+    $$('.work__item').forEach(item => {
+      item.addEventListener('pointerenter', () => {
+        $('#metricValue').textContent = item.dataset.metric;
+        $('#metricLabel').textContent = item.dataset.metricLabel;
+        if (!metricOn) { metricPos.x = pointer.x + 64; metricPos.y = pointer.y - 60; }
+        metricOn = true;
+        metric.classList.add('is-on');
+      });
+      item.addEventListener('pointerleave', () => {
+        metricOn = false;
+        metric.classList.remove('is-on');
+      });
+    });
+
+    $$('[data-spotlight]').forEach(el => {
+      el.addEventListener('pointermove', e => {
+        const r = el.getBoundingClientRect();
+        el.style.setProperty('--sx', e.clientX - r.left + 'px');
+        el.style.setProperty('--sy', e.clientY - r.top + 'px');
+      });
+    });
+  }
+
+  const magnets = finePointer && motion
+    ? $$('[data-magnetic]').map(el => ({ el, k: parseFloat(el.dataset.magnetic) || 0.35, x: 0, y: 0, tx: 0, ty: 0, on: false }))
+    : [];
+  magnets.forEach(m => {
+    m.el.addEventListener('pointermove', e => {
+      const r = m.el.getBoundingClientRect();
+      m.tx = (e.clientX - (r.left + r.width / 2 - m.x)) * m.k;
+      m.ty = (e.clientY - (r.top + r.height / 2 - m.y)) * m.k;
+      m.on = true;
+    });
+    m.el.addEventListener('pointerleave', () => { m.tx = 0; m.ty = 0; });
+  });
+
+  function updatePointerUI() {
+    if (!finePointer) return;
+    const k = motion ? 0.2 : 1;
+    ringPos.x = lerp(ringPos.x, pointer.x, k);
+    ringPos.y = lerp(ringPos.y, pointer.y, k);
+    dot.style.transform = `translate3d(${pointer.x}px,${pointer.y}px,0)`;
+    ring.style.transform = `translate3d(${ringPos.x.toFixed(1)}px,${ringPos.y.toFixed(1)}px,0)`;
+
+    if (metricOn || metric.classList.contains('is-on')) {
+      const flip = pointer.x > vw - 300;
+      const tx = flip ? pointer.x - 300 : pointer.x + 64;
+      const ty = pointer.y - 60;
+      metricPos.x = lerp(metricPos.x, tx, motion ? 0.14 : 1);
+      metricPos.y = lerp(metricPos.y, ty, motion ? 0.14 : 1);
+      metric.style.transform = `translate3d(${metricPos.x.toFixed(1)}px,${metricPos.y.toFixed(1)}px,0)`;
+    }
+
+    for (const m of magnets) {
+      if (!m.on) continue;
+      m.x = lerp(m.x, m.tx, 0.15);
+      m.y = lerp(m.y, m.ty, 0.15);
+      m.el.style.translate = `${m.x.toFixed(2)}px ${m.y.toFixed(2)}px`;
+      if (Math.abs(m.x) < 0.05 && Math.abs(m.y) < 0.05 && !m.tx && !m.ty) {
+        m.on = false;
+        m.el.style.translate = '';
+      }
+    }
+  }
+
+  /* ---------------------------------------------------------------------
+     Navigation: theme, hide on scroll, active link, clock, mobile menu
+     --------------------------------------------------------------------- */
+  const nav = $('#nav');
+  doc.dataset.nav = 'dark';
+
+  const themeIO = new IntersectionObserver(entries => {
+    entries.forEach(en => {
+      if (en.isIntersecting) doc.dataset.nav = en.target.dataset.theme;
+    });
+  }, { rootMargin: '-30px 0px -96% 0px' });
+  $$('[data-theme]').forEach(el => themeIO.observe(el));
+
+  const navLinks = $$('.nav__links a');
+  const activeIO = new IntersectionObserver(entries => {
+    entries.forEach(en => {
+      if (!en.isIntersecting) return;
+      navLinks.forEach(a => a.classList.toggle('is-active', a.getAttribute('href') === '#' + en.target.id));
+    });
+  }, { rootMargin: '-45% 0px -50% 0px' });
+  ['arsenal', 'work', 'path', 'research', 'contact'].forEach(id => { const el = $('#' + id); if (el) activeIO.observe(el); });
+
+  const clock = $('#clock');
+  const fmt = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', hour12: false });
+  const tick = () => { if (clock) clock.textContent = fmt.format(new Date()); };
+  tick();
+  setInterval(tick, 15000);
+
+  const menu = $('#menu');
+  const toggle = $('#menuToggle');
+  let menuOpen = false;
+
+  function openMenu() {
+    menuOpen = true;
+    menu.hidden = false;
+    requestAnimationFrame(() => requestAnimationFrame(() => menu.classList.add('is-open')));
+    doc.classList.add('menu-open');
+    toggle.setAttribute('aria-expanded', 'true');
+    nav.classList.remove('is-hidden');
+    lenis ? lenis.stop() : (document.body.style.overflow = 'hidden');
+    setTimeout(() => $('a', menu)?.focus(), 300);
+  }
+
+  function closeMenu(returnFocus = true) {
+    if (!menuOpen) return;
+    menuOpen = false;
+    menu.classList.remove('is-open');
+    doc.classList.remove('menu-open');
+    toggle.setAttribute('aria-expanded', 'false');
+    lenis ? lenis.start() : (document.body.style.overflow = '');
+    setTimeout(() => { if (!menuOpen) menu.hidden = true; }, 800);
+    if (returnFocus) toggle.focus();
+  }
+
+  toggle?.addEventListener('click', () => (menuOpen ? closeMenu() : openMenu()));
+  addEventListener('keydown', e => { if (e.key === 'Escape') closeMenu(); });
+
+  function updateNav() {
+    if (menuOpen) return;
+    const delta = sy - lastSy;
+    if (sy > vh * 0.9 && delta > 3) nav.classList.add('is-hidden');
+    else if (delta < -3 || sy < vh * 0.5) nav.classList.remove('is-hidden');
+  }
+
+  /* ---------------------------------------------------------------------
+     Contact form — composes an email rather than pretending to send one
+     --------------------------------------------------------------------- */
+  const form = $('#contactForm');
+  const note = $('#formNote');
+  form?.addEventListener('submit', e => {
+    e.preventDefault();
+    const fields = ['name', 'email', 'message'].map(id => form.elements[id]);
+    let firstBad = null;
+    fields.forEach(f => {
+      const bad = !f.value.trim() || (f.type === 'email' && !f.checkValidity());
+      f.parentElement.classList.toggle('is-invalid', bad);
+      f.setAttribute('aria-invalid', bad ? 'true' : 'false');
+      if (bad && !firstBad) firstBad = f;
+    });
+    if (firstBad) {
+      note.textContent = 'Please fill in all three fields with a valid email.';
+      note.classList.add('is-error');
+      firstBad.focus();
+      return;
+    }
+    const [name, email, message] = fields.map(f => f.value.trim());
+    const subject = encodeURIComponent(`Portfolio enquiry — ${name}`);
+    const body = encodeURIComponent(`${message}\n\n— ${name} (${email})`);
+    note.classList.remove('is-error');
+    note.textContent = 'Opening your mail app…';
+    location.href = `mailto:sayantansikdar@outlook.com?subject=${subject}&body=${body}`;
+  });
+
+  /* ---------------------------------------------------------------------
+     Measure + main loop
+     --------------------------------------------------------------------- */
+  const scrollBar = $('.scroll-line span');
+  const badge = $('#badge');
+  let docMax = 1;
+
+  function measure() {
+    vw = innerWidth;
+    vh = innerHeight;
+    sy = scrollY;
+    docMax = Math.max(1, document.documentElement.scrollHeight - vh);
+    if (motion) {
+      measureTracks();
+      measureHero();
+      measureShards();
+      measureMarquee();
+      updateTracks();
+    }
+  }
+
+  let resizeTimer;
+  let lastW = vw;
+  let lastH = vh;
+  addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      // Ignore the small height jitter of mobile URL bars
+      if (innerWidth === lastW && Math.abs(innerHeight - lastH) < 120) return;
+      lastW = innerWidth;
+      lastH = innerHeight;
+      measure();
+    }, 150);
+  });
+
+  let lastFrame = performance.now();
+  function frame(now) {
+    const dt = Math.min(64, now - lastFrame) / 16.667;
+    lastFrame = now;
+    if (lenis) lenis.raf(now);
+    sy = scrollY;
+    const v = lenis ? lenis.velocity : sy - lastSy;
+    velocity = lerp(velocity, v, 0.2);
+
+    if (motion) {
+      updateTracks();
+      updatePortrait(now);
+      updateShards(now, dt);
+      updateMarquee(dt);
+    }
+    updatePointerUI();
+    updateNav();
+    scrollBar.style.setProperty('--doc', (sy / docMax).toFixed(4));
+    if (badge && motion) badge.style.setProperty('--rot', ((sy * 0.06 + now * 0.004) % 360).toFixed(2) + 'deg');
+    pointer.vx *= 0.8;
+    pointer.vy *= 0.8;
+    lastSy = sy;
+    requestAnimationFrame(frame);
+  }
+
+  /* ---------------------------------------------------------------------
+     Intro — counter, one cut, the page opens
+     --------------------------------------------------------------------- */
+  function finishIntro() {
+    doc.classList.add('is-loaded');
+    if (lenis) lenis.start();
+    setTimeout(() => doc.classList.add('intro-done'), 2000);
+  }
+
+  function runIntro() {
+    const loader = $('#loader');
+    const showLoader = motion && !doc.classList.contains('intro-seen') && loader;
+    if (!showLoader) {
+      requestAnimationFrame(finishIntro);
+      return;
+    }
+    if (lenis) lenis.stop();
+    try { sessionStorage.setItem('ss-intro', '1'); } catch (e) { /* private mode */ }
+
+    const count = $('#loaderCount');
+    const img = $('.portrait__base', portrait);
+    const decode = img && img.decode ? img.decode().catch(() => {}) : Promise.resolve();
+    const fonts = document.fonts ? document.fonts.ready : Promise.resolve();
+    let ready = false;
+    Promise.race([Promise.all([decode, fonts]), new Promise(r => setTimeout(r, 4000))]).then(() => { ready = true; });
+
+    const t0 = performance.now();
+    let shown = 0;
+    const step = now => {
+      const t = clamp((now - t0) / 1300);
+      const target = ready && t >= 1 ? 100 : easeOut(t) * 88;
+      shown = Math.min(100, lerp(shown, target, 0.14) + 0.2);
+      count.textContent = String(Math.floor(shown)).padStart(3, '0');
+      if (shown < 99.6) {
+        requestAnimationFrame(step);
+        return;
+      }
+      count.textContent = '100';
+      const dy = 0.082 * innerHeight;
+      loader.style.setProperty('--slash-angle', `${-Math.atan2(dy, innerWidth)}rad`);
+      loader.style.setProperty('--slash-w', `${Math.hypot(innerWidth, dy)}px`);
+      setTimeout(() => loader.classList.add('is-cut'), 120);
+      setTimeout(() => loader.classList.add('is-open'), 480);
+      setTimeout(finishIntro, 640);
+      setTimeout(() => loader.classList.add('is-done'), 1700);
+    };
+    requestAnimationFrame(step);
+  }
+
+  measure();
+  requestAnimationFrame(frame);
+  runIntro();
+  if (document.fonts) document.fonts.ready.then(measure);
+  addEventListener('load', measure);
+})();
