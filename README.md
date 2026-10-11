@@ -139,7 +139,7 @@ A predictive dialer that over-dials must never ring a do-not-call number or leak
 
 One durable Temporal workflow per order; the agent wakes on 3 triggers (start, signal, timer), a classifier gates events by urgency, and it acts through 6 tools with a rolling memory — sleeping on durable timers instead of polling. Runs end to end with no API key via a deterministic mock policy.
 
-`Python` `Temporal` `FastAPI` `PostgreSQL` `Claude API` `Next.js` · [Repository](https://github.com/sayantansikdar/order-supervisor)
+`Python` `Temporal` `FastAPI` `PostgreSQL` `Claude API` `Next.js` · [Repository](https://github.com/sayantansikdar/order-supervisor) · [Live demo](https://sayantansikdar.github.io/order-supervisor/)
 </details>
 
 <details>
@@ -195,7 +195,7 @@ AlexNet / ResNet v2 framework for real-time, non-destructive grading — **99%**
 
 One `docker compose up` runs 6 services: a 4-stage Airflow DAG trains SVD collaborative filtering, with DVC, MLflow, FastAPI, a React front end and Prometheus/Grafana monitoring.
 
-`Airflow` `DVC` `MLflow` `FastAPI` `React` `Docker` · [Repository](https://github.com/sayantansikdar/bookie)
+`Airflow` `DVC` `MLflow` `FastAPI` `React` `Docker` · [Repository](https://github.com/sayantansikdar/bookie) · [Live demo](https://sayantansikdar.github.io/bookie/)
 </details>
 
 ## 💼 Experience

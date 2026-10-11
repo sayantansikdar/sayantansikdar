@@ -237,9 +237,9 @@
 \resumeItemListEnd
 \vspace{-4pt}
 
-\resumeProjectHeadingWithRepo
+\resumeProjectHeadingWithBoth
     {\textbf{Order Supervisor --- Long-Running AI Agent on Temporal}}
-    {https://github.com/sayantansikdar/order-supervisor}{Agentic AI / FDE}
+    {https://github.com/sayantansikdar/order-supervisor}{https://sayantansikdar.github.io/order-supervisor/}{Agentic AI / FDE}
 \resumeItemListStart
     \resumeItem{\textbf{Situation:} Orders need attention for days (failed payments, delays), but an always-on LLM loop is costly and fragile.}
     \resumeItem{\textbf{Action:} Gave each order a durable Temporal workflow whose agent wakes on 3 triggers; a rule-based classifier gates events by urgency, and the agent acts through 6 tools with rolling memory.}
@@ -270,9 +270,9 @@
 \resumeItemListEnd
 \vspace{-4pt}
 
-\resumeProjectHeadingWithRepo
+\resumeProjectHeadingWithBoth
     {\textbf{Bookie --- End-to-End MLOps Book Recommender}}
-    {https://github.com/sayantansikdar/bookie}{MLOps}
+    {https://github.com/sayantansikdar/bookie}{https://sayantansikdar.github.io/bookie/}{MLOps}
 \resumeItemListStart
     \resumeItem{Packaged a full recommender lifecycle into one \texttt{docker compose up}: a 4-stage Airflow DAG (ingest, preprocess, train SVD collaborative filtering, evaluate) with DVC data versioning, MLflow experiment tracking, FastAPI serving, a React front end and Prometheus/Grafana monitoring --- 6 services in total.}
     \resumeItem{\textbf{Tech Stack:} Python, Airflow, DVC, MLflow, FastAPI, React, Docker, Prometheus, Grafana}
