@@ -449,6 +449,26 @@
       });
     });
 
+    // Scrolling moves rows out from under a still pointer without firing
+    // pointerleave, so re-check what's under the cursor after each scroll.
+    let hitQueued = false;
+    addEventListener('scroll', () => {
+      if (!metricOn || hitQueued) return;
+      hitQueued = true;
+      requestAnimationFrame(() => {
+        hitQueued = false;
+        const under = document.elementFromPoint(pointer.x, pointer.y);
+        const item = under && under.closest('.work__item');
+        if (!item) {
+          metricOn = false;
+          metric.classList.remove('is-on');
+        } else {
+          $('#metricValue').textContent = item.dataset.metric;
+          $('#metricLabel').textContent = item.dataset.metricLabel;
+        }
+      });
+    }, { passive: true });
+
     $$('[data-spotlight]').forEach(el => {
       el.addEventListener('pointermove', e => {
         const r = el.getBoundingClientRect();

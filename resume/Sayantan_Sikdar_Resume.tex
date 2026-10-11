@@ -77,6 +77,14 @@
     \end{tabular*}\vspace{-7pt}
 }
 
+% Experience: employer, role, dates (no links)
+\newcommand{\resumeExperienceSimple}[3]{
+  \vspace{-2pt}\item
+    \begin{tabular*}{1.0\textwidth}[t]{l@{\extracolsep{\fill}}r}
+      \textbf{#1} \textit{\small#2} & \textbf{\small #3} \\
+    \end{tabular*}\vspace{-7pt}
+}
+
 % Project: title, repo, right-hand label
 \newcommand{\resumeProjectHeadingWithRepo}[3]{
     \item
@@ -147,7 +155,7 @@
 \begin{itemize}[leftmargin=0.15in, label={}, itemsep=0pt]
     \small{\item{
      \textbf{Programming Languages:}{ Python, TypeScript, SQL, Java} \\
-     \textbf{LLMs \& GenAI:}{ LoRA/QLoRA Fine-Tuning, HuggingFace Transformers, Hybrid RAG (BM25 + Dense, RRF), Embeddings, LanceDB, Agentic Workflows, Pydantic AI, Claude API, Ollama, Prompt Engineering} \\
+     \textbf{LLMs \& GenAI:}{ LoRA/QLoRA Fine-Tuning, HuggingFace Transformers, Hybrid RAG (BM25 + Dense, RRF), Embeddings, LanceDB, Agentic Workflows, LLM Evaluation \& Benchmarking, Pydantic AI, Claude API, Ollama, Prompt Engineering} \\
      \textbf{Machine Learning:}{ PyTorch, TensorFlow/Keras, scikit-learn, XGBoost, Time-Series Forecasting, Bayesian Optimization (TuRBO, SAASBO), CMA-ES, Computer Vision (YOLO, OpenCV), Collaborative Filtering, A/B Testing} \\
      \textbf{Data Engineering \& Analytics:}{ Microsoft Fabric, Medallion Architecture, Delta Lake, PySpark, Spark SQL, SCD Type 2, Data Quality \& Reconciliation, Airflow, DVC, PostgreSQL, SQLite, DynamoDB} \\
      \textbf{Backend \& Orchestration:}{ FastAPI, Fastify, Temporal (durable workflows), REST/SSE APIs, Next.js 15, React, Drizzle ORM, Stripe, Clerk} \\
@@ -160,6 +168,16 @@
 %-----------EXPERIENCE-----------
 \section{Work Experience}
 \resumeSubHeadingListStart
+
+\resumeExperienceSimple
+    {Handshake}{ | \textit{AI Evaluation Specialist}}
+    {July 2025}
+    \resumeItemListStart
+        \resumeItem{\textbf{Situation:} Frontier AI labs need agentic benchmark tasks that measure real terminal skill and cannot be gamed by the model under test.}
+        \resumeItem{\textbf{Action:} Contributed 6+ Docker-sandboxed agentic-AI evaluation tasks to Terminal-Bench 2 (Harbor), enforcing four-way consistency and a tamper-proof verifier design.}
+        \resumeItem{\textbf{Result:} Achieved an 88.9\% acceptance rate on frontier-model benchmarking tasks, meeting the GPT-5.4 acceptance bar.}
+        \resumeItem{\textbf{Tech Stack:} Docker, Python, Agentic AI, Evaluation Frameworks, LLM Benchmarking}
+    \resumeItemListEnd
 
 \resumeExperienceWithBoth
     {Self Employed}{ | \textit{Freelance Full Stack Developer}}

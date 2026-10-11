@@ -202,6 +202,7 @@ One `docker compose up` runs 6 services: a 4-stage Airflow DAG trains SVD collab
 
 | Period | Role | Where | Highlights |
 |---|---|---|---|
+| Jul 2025 | AI Evaluation Specialist | Handshake | 6+ Docker-sandboxed agentic-AI eval tasks for Terminal-Bench 2 (Harbor) — 88.9% acceptance rate |
 | Feb 2025 – May 2025 | Freelance Full Stack Developer | Self-employed | Shipped Morsaab's platform — Stripe, admin CRM — in under 40 hours |
 | Mar 2024 – Apr 2024 | Architect-Machine Learning Trainee | WBSEDCL | YOLO v5/v7/v9-e meter reading: 99% accuracy, 93% mAP, 95% fewer errors, 500+ hours saved a year |
 | Sep 2023 – Mar 2024 | Artificial Intelligence Intern | NIELIT Kolkata | Fruit-grading DNN, 99% accuracy — published at IEEE |
