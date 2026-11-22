@@ -23,7 +23,7 @@
 <table align="center">
   <tr>
     <td align="center" width="160">
-      <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=26&duration=2200&pause=1200&color=FF4128&center=true&vCenter=true&width=140&height=40&lines=9" alt="9">
+      <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=26&duration=2200&pause=1200&color=FF4128&center=true&vCenter=true&width=140&height=40&lines=10" alt="10">
       <br><sub><b>Projects shipped</b></sub>
     </td>
     <td align="center" width="160">
@@ -140,6 +140,21 @@ A predictive dialer that over-dials must never ring a do-not-call number or leak
 One durable Temporal workflow per order; the agent wakes on 3 triggers (start, signal, timer), a classifier gates events by urgency, and it acts through 6 tools with a rolling memory — sleeping on durable timers instead of polling. Runs end to end with no API key via a deterministic mock policy.
 
 `Python` `Temporal` `FastAPI` `PostgreSQL` `Claude API` `Next.js` · [Repository](https://github.com/sayantansikdar/order-supervisor) · [Live demo](https://sayantansikdar.github.io/order-supervisor/)
+</details>
+
+<details open>
+<summary><b>🏨 Hotel Offer Orchestrator — fault-tolerant price aggregator</b> · <i>distributed systems</i></summary>
+<br>
+
+A Temporal workflow queries 2 hotel suppliers in parallel (3-attempt retries, single-supplier fallback), keeps the cheapest offer per hotel, and caches the result in Redis sorted sets so price-range filters run as one `ZRANGE BYSCORE`.
+
+| Result | |
+|---|---|
+| Overlapping listings → cheapest unique hotels (Delhi) | **10 → 6** |
+| Unit + workflow tests / Postman assertions | **23 / 57** — 0 failures, live |
+| Single-container deploy on a 512 MB free instance | **~270 MB** |
+
+`TypeScript` `Node.js` `Express` `Temporal` `Redis` `Docker` `Render` `Vitest` `Postman` · [Repository](https://github.com/sayantansikdar/hotel-offer-orchestrator) · [Live demo](https://hotel-offer-orchestrator-y8rq.onrender.com/api/hotels?city=delhi)
 </details>
 
 <details>
