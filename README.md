@@ -154,7 +154,7 @@ A Temporal workflow queries 2 hotel suppliers in parallel (3-attempt retries, si
 | Unit + workflow tests / Postman assertions | **23 / 57** — 0 failures, live |
 | Single-container deploy on a 512 MB free instance | **~270 MB** |
 
-`TypeScript` `Node.js` `Express` `Temporal` `Redis` `Docker` `Render` `Vitest` `Postman` · [Repository](https://github.com/sayantansikdar/hotel-offer-orchestrator) · [Live demo](https://hotel-offer-orchestrator-y8rq.onrender.com/api/hotels?city=delhi)
+`TypeScript` `Node.js` `Express` `Temporal` `Redis` `Docker` `Render` `Vitest` `Postman` · [Repository](https://github.com/sayantansikdar/hotel-offer-orchestrator) · [Live console](https://sayantansikdar.github.io/hotel-offer-orchestrator/) · [API](https://hotel-offer-orchestrator-y8rq.onrender.com/api/hotels?city=delhi)
 </details>
 
 <details>
